@@ -1,7 +1,7 @@
 # Message Bus Bundle #
 
-[![CI](https://github.com/silpo-tech/MapperBundle/actions/workflows/ci.yml/badge.svg)](https://github.com/silpo-tech/MapperBundle/actions)
-[![codecov](https://codecov.io/gh/silpo-tech/MapperBundle/graph/badge.svg)](https://codecov.io/gh/silpo-tech/MapperBundle)
+[![CI](https://github.com/silpo-tech/MessageBusBundle/actions/workflows/ci.yml/badge.svg)](https://github.com/silpo-tech/MessageBusBundle/actions)
+[![codecov](https://codecov.io/gh/silpo-tech/MessageBusBundle/graph/badge.svg)](https://codecov.io/gh/silpo-tech/MessageBusBundle)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Development ##

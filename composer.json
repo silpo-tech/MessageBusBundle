@@ -12,7 +12,8 @@
     "symfony/uid": "^6.0|^7.0",
     "enqueue/amqp-lib": "^0.10.9",
     "php-amqplib/php-amqplib": "^3.5.1",
-    "enqueue/enqueue-bundle": "^0.10"
+    "enqueue/enqueue-bundle": "^0.10",
+    "silpo-tech/mapper-bundle": "^1.0"
   },
   "require-dev": {
     "symfony/validator": "^6.0|^7.0",
@@ -22,7 +23,8 @@
     "symfony/framework-bundle": "^6.0|^7.0",
     "symfony/yaml": "^6.0|^7.0",
     "php-solution/sf-functional-test": "^6.0",
-    "silpo-tech/lib-test-utilities": "^1.0"
+    "silpo-tech/lib-test-utilities": "^1.0",
+    "friendsofphp/php-cs-fixer": "^3.0"
   },
   "config": {
     "secure-http": false,
