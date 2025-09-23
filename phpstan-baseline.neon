@@ -1,2 +1,157 @@
 parameters:
 	ignoreErrors:
+		-
+			message: '#^Call to an undefined method Interop\\Queue\\Processor\:\:getSubscribedRoutingKeys\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Command/ConsumeCommand.php
+
+		-
+			message: '#^Parameter \#2 \$code of class LogicException constructor expects int, null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Command/ConsumeCommand.php
+
+		-
+			message: '#^Call to an undefined method Interop\\Amqp\\AmqpContext\:\:getLibChannel\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Command/RequeueFailedCommand.php
+
+		-
+			message: '#^Call to an undefined method Interop\\Queue\\Context\:\:convertMessage\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Command/RequeueFailedCommand.php
+
+		-
+			message: '#^Instanceof between MessageBusBundle\\Exception\\InterruptProcessingException and MessageBusBundle\\Exception\\InterruptProcessingException will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: src/Consumption/BatchQueueConsumer.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\Config\\Definition\\Builder\\NodeDefinition\:\:children\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/DependencyInjection/Configuration.php
+
+		-
+			message: '#^Call to an undefined method Interop\\Queue\\Context\:\:bind\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Driver/AmqpDriver.php
+
+		-
+			message: '#^Parameter \#2 \$source of class Interop\\Amqp\\Impl\\AmqpBind constructor expects Interop\\Amqp\\AmqpDestination, Interop\\Queue\\Queue given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Driver/AmqpDriver.php
+
+		-
+			message: '#^Parameter \#1 \$context of class MessageBusBundle\\Driver\\AmqpDriver constructor expects Interop\\Amqp\\AmqpContext, Interop\\Queue\\Context given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Driver/DriverFactory.php
+
+		-
+			message: '#^Trait MessageBusBundle\\Encoder\\EncoderRegistryAwareTrait is used zero times and is not analysed\.$#'
+			identifier: trait.unused
+			count: 1
+			path: src/Encoder/EncoderRegistryAwareTrait.php
+
+		-
+			message: '#^Variable \$body might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/EnqueueProcessor/AbstractProcessor.php
+
+		-
+			message: '#^Instanceof between MessageBusBundle\\Exception\\InterruptProcessingException and MessageBusBundle\\Exception\\InterruptProcessingException will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: src/EnqueueProcessor/Batch/AbstractBatchProcessor.php
+
+		-
+			message: '#^Method MessageBusBundle\\EnqueueProcessor\\Batch\\AbstractBatchProcessor\:\:process\(\) should return array\<string\> but returns array\<MessageBusBundle\\EnqueueProcessor\\Batch\\Result\>\.$#'
+			identifier: return.type
+			count: 1
+			path: src/EnqueueProcessor/Batch/AbstractBatchProcessor.php
+
+		-
+			message: '#^PHPDoc tag @param has invalid value \(InteropMessage\[\]\)\: Unexpected token "\\n     \*", expected variable at offset 34 on line 2$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/EnqueueProcessor/Batch/AbstractBatchProcessor.php
+
+		-
+			message: '#^Constant MessageBusBundle\\EnqueueProcessor\\ExceptionHandler\\RequeueHandler\:\:REQUEUE_STACK_TRACE is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: src/EnqueueProcessor/ExceptionHandler/RequeueHandler.php
+
+		-
+			message: '#^Trait MessageBusBundle\\EnqueueProcessor\\OptionsProcessorAwareTrait is used zero times and is not analysed\.$#'
+			identifier: trait.unused
+			count: 1
+			path: src/EnqueueProcessor/OptionsProcessorAwareTrait.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\Persistence\\ObjectManager\:\:isOpen\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/EventSubscriber/ConsumerDoctrineEventSubscriber.php
+
+		-
+			message: '#^Parameter \#1 \$tags of method Sentry\\Tracing\\SpanContext\:\:setTags\(\) expects array\<string, string\>, array\<string, int\<0, max\>\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/EventSubscriber/SentryProfilerEventSubscriber.php
+
+		-
+			message: '#^Call to an undefined method Interop\\Queue\\Context\:\:declareQueue\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Producer/EnqueueProducer.php
+
+		-
+			message: '#^Call to an undefined method Interop\\Queue\\Message\:\:setRoutingKey\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Producer/EnqueueProducer.php
+
+		-
+			message: '#^Call to an undefined method Interop\\Queue\\Producer\:\:setDelayStrategy\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Producer/EnqueueProducer.php
+
+		-
+			message: '#^PHPDoc tag @param for parameter \$exchange with type string\|null is not subtype of native type string\.$#'
+			identifier: parameter.phpDocType
+			count: 2
+			path: src/Producer/EnqueueProducer.php
+
+		-
+			message: '#^PHPDoc tag @param for parameter \$message with type string is incompatible with native type Interop\\Queue\\Message\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Producer/EnqueueProducer.php
+
+		-
+			message: '#^Variable \$exchange on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: src/Producer/EnqueueProducer.php
+
+		-
+			message: '#^Trait MessageBusBundle\\Traits\\ProducerAwareTrait is used zero times and is not analysed\.$#'
+			identifier: trait.unused
+			count: 1
+			path: src/Traits/ProducerAwareTrait.php
+
+		-
+			message: '#^Call to an undefined method MessageBusBundle\\Tests\\TestCase\\Command\\RequeueFailedCommandTest\:\:prophesize\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: tests/TestCase/Command/RequeueFailedCommandTest.php
