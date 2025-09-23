@@ -4,6 +4,7 @@
   "description": "Message bus bundle for Symfony",
   "license": "MIT",
   "require": {
+    "ext-amqp": "*",
     "php": ">=8.1",
     "symfony/event-dispatcher": "^7.0",
     "symfony/serializer": "^7.0",
@@ -13,7 +14,8 @@
     "enqueue/amqp-lib": "^0.10.9",
     "php-amqplib/php-amqplib": "^3.5.1",
     "enqueue/enqueue-bundle": "^0.10",
-    "silpo-tech/mapper-bundle": "^1.0"
+    "silpo-tech/mapper-bundle": "^1.0",
+    "symfony/doctrine-bridge": "^7.3"
   },
   "require-dev": {
     "symfony/validator": "^7.0",
