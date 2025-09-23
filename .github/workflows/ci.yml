@@ -20,6 +20,22 @@ jobs:
       contents: read
       id-token: write
 
+    services:
+      rabbitmq:
+        image: rabbitmq:3-management
+        ports:
+          - 5672:5672
+        env:
+          MESSAGE_BUS_HOST: message-bus-rabbit-1
+          MESSAGE_BUS_VHOST: /
+          MESSAGE_BUS_PORT: 5672
+          MESSAGE_BUS_USERNAME: rabbitmq
+          MESSAGE_BUS_PASSWORD: rabbitmq
+          MESSAGE_BUS_HEARTBEAT: 600
+          MESSAGE_BUS_PREFETCH: 25
+          MESSAGE_BUS_DSN: 'amqp://rabbitmq:rabbitmq@message-bus-rabbit-1/%2f'
+          RABBITMQ_DEFAULT_USER: rabbitmq
+          RABBITMQ_DEFAULT_PASS: rabbitmq
     steps:
       - uses: actions/checkout@v4
         with:
