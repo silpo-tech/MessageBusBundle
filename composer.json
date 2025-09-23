@@ -1,0 +1,59 @@
+{
+  "name": "silpo-tech/message-bus-bundle",
+  "type": "symfony-bundle",
+  "description": "Message bus bundle for Symfony",
+  "license": "MIT",
+  "require": {
+    "php": ">=8.1",
+    "symfony/event-dispatcher": "^6.0|^7.0",
+    "symfony/serializer": "^6.0|^7.0",
+    "symfony/console": "^6.0|^7.0",
+    "symfony/expression-language": "^6.0|^7.0",
+    "symfony/uid": "^6.0|^7.0",
+    "enqueue/amqp-lib": "^0.10.9",
+    "php-amqplib/php-amqplib": "^3.5.1",
+    "enqueue/enqueue-bundle": "^0.10"
+  },
+  "require-dev": {
+    "symfony/validator": "^6.0|^7.0",
+    "monolog/monolog": "^2.0|^3.0",
+    "sentry/sentry": "^3.0|^4.0",
+    "phpunit/phpunit": "^11.4",
+    "symfony/framework-bundle": "^6.0|^7.0",
+    "symfony/yaml": "^6.0|^7.0",
+    "php-solution/sf-functional-test": "^6.0",
+    "silpo-tech/lib-test-utilities": "^1.0"
+  },
+  "config": {
+    "secure-http": false,
+    "allow-plugins": {
+      "php-http/discovery": false
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "MessageBusBundle\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "MessageBusBundle\\Tests\\": "tests/"
+    }
+  },
+  "suggest": {
+    "ext-zlib": "to use message compression"
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true,
+  "scripts": {
+    "test:ci": [
+      "@test:coverage"
+    ],
+    "test:coverage": {
+      "command": "APP_ENV=test php -d extension=pcov.so -d pcov.enabled=1 vendor/bin/phpunit --coverage-text --coverage-html ./reports/coverage --colors=never --coverage-cobertura=./reports/coverage/cobertura.xml --coverage-clover=./reports/coverage/clover.xml --log-junit=./reports/coverage/junit.xml"
+    },
+    "test:run": [
+      "APP_ENV=test php vendor/bin/phpunit --color=always"
+    ]
+  }
+}

@@ -1,0 +1,97 @@
+parameters:
+  env(MESSAGE_BUS_BATCH_SIZE): "9223372036854775807"
+  message_bus.batch_size.default: "%env(int:MESSAGE_BUS_BATCH_SIZE)%"
+  env(MESSAGE_BUS_RECEIVE_TIMEOUT): "10000"
+  message_bus.batch.receive_timeout.default: "%env(int:MESSAGE_BUS_RECEIVE_TIMEOUT)%"
+
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: true
+    bind:
+      int $compressionLevel: '%messagebus.compression.level%'
+      array $allowOptions: '%messagebus.allow_options%'
+
+  enqueue.client.default.driver_factory:
+    class: MessageBusBundle\Driver\DriverFactory
+
+  MessageBusBundle\EnqueueProcessor\ExceptionHandler\ChainExceptionHandler:
+    calls:
+      - [addHandler, ['@MessageBusBundle\EnqueueProcessor\ExceptionHandler\RequeueHandler', 10]]
+      - [addHandler, ['@MessageBusBundle\EnqueueProcessor\ExceptionHandler\ValidationHandler', 10]]
+      - [addHandler, ['@MessageBusBundle\EnqueueProcessor\ExceptionHandler\RejectHandler', 10]]
+      - [addHandler, ['@MessageBusBundle\EnqueueProcessor\ExceptionHandler\FailConsumeHandler', 0]]
+
+  MessageBusBundle\Command\SetupTransportCommand:
+    arguments:
+      $handlers: !tagged_iterator enqueue.transport.processor
+    tags:
+      - { name: 'console.command' }
+
+  MessageBusBundle\Command\ConsumeCommand:
+    arguments:
+      - '@enqueue.locator'
+      - '@MessageBusBundle\AmqpTools\RabbitMqQueueManager'
+      - '%enqueue.default_transport%'
+      - 'enqueue.transport.%s.queue_consumer'
+      - 'enqueue.transport.%s.processor_registry'
+    tags:
+      - { name: 'console.command' }
+
+  MessageBusBundle\Command\BatchConsumeCommand:
+    tags:
+      - { name: 'console.command' }
+
+  MessageBusBundle\Command\RequeueFailedCommand:
+    tags:
+      - { name: 'console.command' }
+
+  MessageBusBundle\EnqueueProcessor\ExceptionHandler\RequeueHandler:
+    arguments:
+      $config: '@enqueue.client.default.config'
+
+  MessageBusBundle\EnqueueProcessor\ExceptionHandler\RejectHandler:
+
+  MessageBusBundle\EnqueueProcessor\ExceptionHandler\ValidationHandler:
+    arguments:
+      $config: '@enqueue.client.default.config'
+
+  MessageBusBundle\EnqueueProcessor\ExceptionHandler\FailConsumeHandler:
+    arguments:
+      $config: '@enqueue.client.default.config'
+
+  MessageBusBundle\Producer\ProducerInterface:
+    class: MessageBusBundle\Producer\EnqueueProducer
+    lazy: true
+    shared: false
+    arguments:
+      $config: '@enqueue.client.default.config'
+      $factory: '@enqueue.transport.default.connection_factory_factory'
+
+  MessageBusBundle\Service\ProducerService:
+  MessageBusBundle\Consumption\BatchQueueConsumer:
+    arguments:
+      $interopContexts: ["@?enqueue.transport.batch.context", "@?enqueue.transport.default.context", ]
+      $batchSize: '%message_bus.batch_size.default%'
+      $receiveTimeout: '%message_bus.batch.receive_timeout.default%'
+
+  MessageBusBundle\Enqueue\ContainerBatchProcessorRegistry:
+    $locator: !tagged_locator { tag: 'messagesbus.batch_processor', index_by: 'key' }
+
+  MessageBusBundle\Enqueue\BatchProcessorRegistryInterface: '@MessageBusBundle\Enqueue\ContainerBatchProcessorRegistry'
+
+  MessageBusBundle\Encoder\:
+    resource: '../../Encoder/*'
+
+  MessageBusBundle\Encoder\EncoderRegistry:
+    calls:
+      - [addEncoder, ['@MessageBusBundle\Encoder\GzipEncoder']]
+      - [addEncoder, ['@MessageBusBundle\Encoder\DeflateEncoder']]
+      - [addEncoder, ['@MessageBusBundle\Encoder\ZlibEncoder']]
+
+  MessageBusBundle\EventSubscriber\EncodedMessageEventSubscriber: ~
+  MessageBusBundle\EventSubscriber\SentryProfilerEventSubscriber: ~
+  MessageBusBundle\EventSubscriber\ConsoleSubscriber: ~
+
+  MessageBusBundle\AmqpTools\RabbitMqQueueManager: ~

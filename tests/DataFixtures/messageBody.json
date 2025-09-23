@@ -1,0 +1,148 @@
+{
+  "order": {
+    "id": "1ef53223-ae32-69fc-bf79-954652c2437f",
+    "number": null,
+    "subtotal": 69,
+    "receipt": {
+      "total": 69,
+      "subtotal": 69,
+      "round": 0,
+      "discount": 0,
+      "paymentSum": 69,
+      "sum": 69
+    },
+    "status": "canceled",
+    "comment": "AUT Payment guest order 05082024145948",
+    "barcode": null,
+    "externalId": "1ef53223-9973-6ac0-8878-53b8da0f5f3f",
+    "paymentInfo": null,
+    "deliveryInfo": {
+      "cost": 69,
+      "courier": null,
+      "plannedDateTime": null
+    },
+    "address": {
+      "city": "Київ",
+      "street": "вулиця Ентузіастів",
+      "building": "3/1",
+      "entrance": "1",
+      "housing": null,
+      "apartment": "3",
+      "floor": "1",
+      "latitude": 50.434120050529,
+      "longitude": 30.59583422562,
+      "comment": "guest address 05082024145948"
+    },
+    "guest": {
+      "profileId": "be4b991a-24d8-4956-ab0b-0a1daf227c05",
+      "firstName": "Тест",
+      "lastName": null,
+      "email": "fz.ft.team01+aut.web.guest.payment@gmail.com",
+      "phone": "+380931200889",
+      "isNew": null
+    },
+    "mainBranch": {
+      "id": "1ecb4e63-6a9a-6b22-aaeb-ab78d56a2f65"
+    },
+    "shipments": [
+      {
+        "id": "1ef53223-af0f-6172-a335-954652c2437f",
+        "number": null,
+        "branch": {
+          "id": "1ef3e004-a603-6ef6-b71a-4fcc7002dfe7",
+          "type": "restaurant",
+          "company": {
+            "id": "1ef3dd78-4c82-6b5e-a827-dd224e368686"
+          }
+        },
+        "status": "canceled",
+        "subtotal": 0,
+        "containsAgeRestrictedItems": false,
+        "receipt": {
+          "total": 0,
+          "subtotal": 0,
+          "round": 0,
+          "discount": 0,
+          "paymentSum": 0,
+          "sum": 0
+        },
+        "prepareTime": null,
+        "expectedReadyTime": null,
+        "items": [
+          {
+            "id": "1ef53223-af0f-6352-b5f4-954652c2437f",
+            "offer": {
+              "id": "1ef3e9c1-ce34-662a-b73f-e33e20a29bf5",
+              "price": 32
+            },
+            "product": {
+              "id": "1ef3e994-2e01-6fea-bb7f-f760158d4939",
+              "sku": "sku_123",
+              "title": "AUT PRODUCT PAYMENT",
+              "image": "31c8c887-40ae-484a-a239-5afab861815e.jpeg",
+              "barcodes": [],
+              "weight": null,
+              "extraIngredients": []
+            },
+            "exciseNumbers": [],
+            "quantity": 0,
+            "subtotal": 0,
+            "ageLimit": null,
+            "receipt": {
+              "total": 0,
+              "subtotal": 0,
+              "round": 0,
+              "discount": 0
+            },
+            "discounts": [],
+            "kitItems": [],
+            "comment": null
+          }
+        ],
+        "cancellation": null,
+        "promos": []
+      }
+    ],
+    "cancellation": {
+      "code": "canceled_by_guest__other",
+      "title": "cancel_reason.canceled_by_guest__other",
+      "comment": "gfgfg"
+    },
+    "createdAt": "2024-08-05T11:59:55+00:00",
+    "updatedAt": "2024-08-20T07:10:54+00:00",
+    "sourceType": "silpo.app.loko",
+    "settlement": null,
+    "assembleInfo": null,
+    "delivery": null
+  },
+  "reason": {
+    "type": "cancel",
+    "code": "canceled_by_guest__other",
+    "comment": "gfgfg",
+    "shipments": [
+      {
+        "id": "1ef53223-af0f-6172-a335-954652c2437f",
+        "branch": {
+          "id": "1ef3e004-a603-6ef6-b71a-4fcc7002dfe7",
+          "type": "restaurant",
+          "company": {
+            "id": "1ef3dd78-4c82-6b5e-a827-dd224e368686"
+          }
+        },
+        "add": [],
+        "deduct": [
+          {
+            "item": {
+              "id": "1ef53223-af0f-6352-b5f4-954652c2437f"
+            },
+            "quantity": 1,
+            "subtotal": 0,
+            "ingredients": null
+          }
+        ]
+      }
+    ],
+    "createdAt": "2024-08-20T07:10:54+00:00",
+    "updatedAt": "2024-08-20T07:10:54+00:00"
+  }
+}

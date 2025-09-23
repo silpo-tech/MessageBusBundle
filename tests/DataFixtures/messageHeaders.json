@@ -1,0 +1,6 @@
+{
+  "enqueue.topic": "route-name",
+  "requeue-count": 6,
+  "php.class_name": "SDK\\Product\\DTO\\ObjectDTO",
+  "requeue-reason": "Client error: `404 Not Found`"
+}

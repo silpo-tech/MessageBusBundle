@@ -1,0 +1,10 @@
+.idea
+.DS_Store
+vendor
+composer.lock
+bin
+.phpunit.cache
+reports
+.php-cs-fixer.cache
+var
+.env.test.local

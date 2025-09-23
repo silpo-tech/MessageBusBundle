@@ -1,0 +1,27 @@
+services:
+  ##
+  api:
+    tty: true
+    privileged: true
+    stdin_open: true
+    build:
+      context: .
+    volumes:
+      - ./reports:/var/www/project/reports
+      - .:/var/www/project
+    env_file:
+      - ./test.env
+    links:
+      - rabbit
+
+  ##
+  rabbit:
+    image: rabbitmq:3-management
+    tty: true
+    privileged: true
+    stdin_open: true
+    ports:
+      - 5672:5672
+      - 15672:15672
+    env_file:
+      - ./test.env
