@@ -9,6 +9,18 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    
+    services:
+      rabbitmq:
+        image: rabbitmq:3-management
+        ports:
+          - 5672:5672
+        options: >-
+          --health-cmd "rabbitmq-diagnostics -q ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
     strategy:
       matrix:
         php-version: ['8.3', '8.4']
@@ -20,14 +32,6 @@ jobs:
       contents: read
       id-token: write
 
-    services:
-      rabbitmq:
-        image: rabbitmq:3-management
-        ports:
-          - 5672:5672
-        env:
-          RABBITMQ_DEFAULT_USER: rabbitmq
-          RABBITMQ_DEFAULT_PASS: rabbitmq
     steps:
       - uses: actions/checkout@v4
         with:
@@ -54,27 +58,27 @@ jobs:
 
       - name: Run test suite
         env:
-          MESSAGE_BUS_HOST: message-bus-rabbit-1
+          MESSAGE_BUS_HOST: localhost
           MESSAGE_BUS_VHOST: /
           MESSAGE_BUS_PORT: 5672
-          MESSAGE_BUS_USERNAME: rabbitmq
-          MESSAGE_BUS_PASSWORD: rabbitmq
+          MESSAGE_BUS_USERNAME: guest
+          MESSAGE_BUS_PASSWORD: guest
           MESSAGE_BUS_HEARTBEAT: 600
           MESSAGE_BUS_PREFETCH: 25
-          MESSAGE_BUS_DSN: 'amqp://rabbitmq:rabbitmq@message-bus-rabbit-1/%2f'
+          MESSAGE_BUS_DSN: 'amqp://guest:guest@localhost/%2f'
         run: composer test:run
 
       - name: Run tests with coverage
         if: matrix.php-version == '8.3' && matrix.dependency-version == 'prefer-stable'
         env:
-          MESSAGE_BUS_HOST: message-bus-rabbit-1
+          MESSAGE_BUS_HOST: localhost
           MESSAGE_BUS_VHOST: /
           MESSAGE_BUS_PORT: 5672
-          MESSAGE_BUS_USERNAME: rabbitmq
-          MESSAGE_BUS_PASSWORD: rabbitmq
+          MESSAGE_BUS_USERNAME: guest
+          MESSAGE_BUS_PASSWORD: guest
           MESSAGE_BUS_HEARTBEAT: 600
           MESSAGE_BUS_PREFETCH: 25
-          MESSAGE_BUS_DSN: 'amqp://rabbitmq:rabbitmq@message-bus-rabbit-1/%2f'
+          MESSAGE_BUS_DSN: 'amqp://guest:guest@localhost/%2f'
         run: composer test:coverage
 
       - name: Upload coverage reports to Codecov
