@@ -12,7 +12,6 @@ use MessageBusBundle\Events\ConsumeRejectEvent;
 use MessageBusBundle\Exception\RejectException;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
-use Throwable;
 
 class RejectHandler implements ExceptionHandlerInterface
 {
@@ -26,13 +25,9 @@ class RejectHandler implements ExceptionHandlerInterface
 
     /**
      * @param RejectException $exception
-     * @param Message $message
-     * @param Context $context
-     * @param ProcessorInterface $processor
-     * @return string
      */
     public function handle(
-        Throwable $exception,
+        \Throwable $exception,
         Message $message,
         Context $context,
         ProcessorInterface $processor,
@@ -49,7 +44,7 @@ class RejectHandler implements ExceptionHandlerInterface
         return Processor::REJECT;
     }
 
-    public function supports(Throwable $exception): bool
+    public function supports(\Throwable $exception): bool
     {
         return $exception instanceof RejectException;
     }

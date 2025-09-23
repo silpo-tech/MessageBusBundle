@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace MessageBusBundle\EnqueueProcessor\ExceptionHandler;
 
+use Enqueue\Client\Config;
 use Interop\Queue\Context;
 use Interop\Queue\Message;
 use Interop\Queue\Processor;
 use MessageBusBundle\EnqueueProcessor\ProcessorInterface;
-use Psr\Log\LoggerInterface;
-use Enqueue\Client\Config;
 use MessageBusBundle\Producer\ProducerInterface;
-use Throwable;
+use Psr\Log\LoggerInterface;
 
 class FailConsumeHandler implements ExceptionHandlerInterface
 {
@@ -35,7 +34,7 @@ class FailConsumeHandler implements ExceptionHandlerInterface
     }
 
     public function handle(
-        Throwable $exception,
+        \Throwable $exception,
         Message $message,
         Context $context,
         ProcessorInterface $processor,
@@ -62,7 +61,7 @@ class FailConsumeHandler implements ExceptionHandlerInterface
             $this->producer->sendMessageToQueue($this->createQueueName($processor), $message);
 
             $this->logger->error(self::MESSAGE_FAIL_CONSUME, $logMessage);
-        } catch (Throwable $exception) {
+        } catch (\Throwable $exception) {
             $this->logger->error(
                 self::MESSAGE_FAIL_CONSUME,
                 array_merge($logMessage, ['handleException' => $exception])
@@ -72,7 +71,7 @@ class FailConsumeHandler implements ExceptionHandlerInterface
         return Processor::REJECT;
     }
 
-    public function supports(Throwable $exception): bool
+    public function supports(\Throwable $exception): bool
     {
         return true;
     }
@@ -81,6 +80,6 @@ class FailConsumeHandler implements ExceptionHandlerInterface
     {
         $originalQueueName = array_keys($processor->getSubscribedRoutingKeys())[0];
 
-        return $originalQueueName . $this->config->getSeparator() . self::QUEUE_SUFFIX;
+        return $originalQueueName.$this->config->getSeparator().self::QUEUE_SUFFIX;
     }
 }

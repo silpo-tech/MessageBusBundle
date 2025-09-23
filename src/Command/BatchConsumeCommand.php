@@ -26,8 +26,7 @@ class BatchConsumeCommand extends Command
         BatchQueueConsumer $queueConsumer,
         BatchProcessorRegistryInterface $processorRegistry,
         RabbitMqQueueManager $rmqQueueManager
-    )
-    {
+    ) {
         $this->queueConsumer = $queueConsumer;
         $this->processorRegistry = $processorRegistry;
         $this->rmqQueueManager = $rmqQueueManager;
@@ -38,8 +37,8 @@ class BatchConsumeCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setDescription('A worker that consumes message from a broker. ' .
-                'To use this broker you have to explicitly set a queue to consume from ' .
+            ->setDescription('A worker that consumes message from a broker. '.
+                'To use this broker you have to explicitly set a queue to consume from '.
                 'and a message processor service')
             ->addArgument('processor', InputArgument::REQUIRED, 'A message processor.')
             ->addOption('initQueue', null, InputOption::VALUE_NONE, 'Queue has to be initialized')
@@ -55,9 +54,7 @@ class BatchConsumeCommand extends Command
         }
 
         if (!($processor instanceof AbstractBatchProcessor)) {
-            throw new NonBatchProcessorException(
-                sprintf('%s processor is not support batch consume', $input->getArgument('processor'))
-            );
+            throw new NonBatchProcessorException(sprintf('%s processor is not support batch consume', $input->getArgument('processor')));
         }
 
         if ($input->getOption('initQueue')) {

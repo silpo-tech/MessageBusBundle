@@ -8,7 +8,6 @@ use MessageBusBundle\EnqueueProcessor\Batch\BatchProcessorInterface;
 
 class BatchCallbackProcessor implements BatchProcessorInterface
 {
-
     /**
      * @var callable
      */
@@ -21,6 +20,7 @@ class BatchCallbackProcessor implements BatchProcessorInterface
 
     /**
      * @param Message[] $messagesBatch
+     *
      * @return string[]
      */
     public function process(array $messagesBatch, Context $context): array

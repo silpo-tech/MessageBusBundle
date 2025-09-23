@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace MessageBusBundle\EventSubscriber;
 
-use Symfony\Bridge\Doctrine\ManagerRegistry;
 use MessageBusBundle\Events;
+use Symfony\Bridge\Doctrine\ManagerRegistry;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class ConsumerDoctrineEventSubscriber implements EventSubscriberInterface

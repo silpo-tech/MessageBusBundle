@@ -13,7 +13,6 @@ class RabbitMqQueueManager
 {
     public function __construct(private readonly Context $context)
     {
-
     }
 
     public function initQueue(string $queueName, array $routingKeys): void

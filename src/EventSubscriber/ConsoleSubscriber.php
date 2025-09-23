@@ -15,7 +15,6 @@ class ConsoleSubscriber implements EventSubscriberInterface
 {
     public function __construct(private readonly array $allowOptions)
     {
-
     }
 
     public static function getSubscribedEvents()
@@ -25,7 +24,7 @@ class ConsoleSubscriber implements EventSubscriberInterface
 
     public function onConsoleCommand(ConsoleCommandEvent $event)
     {
-        if ($event->getCommand() instanceof ConsumeCommand  || $event->getCommand() instanceof BatchConsumeCommand) {
+        if ($event->getCommand() instanceof ConsumeCommand || $event->getCommand() instanceof BatchConsumeCommand) {
             foreach ($this->allowOptions as $allowOption) {
                 $event->getCommand()
                     ->addOption(name: $allowOption, mode: InputOption::VALUE_OPTIONAL);

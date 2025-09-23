@@ -16,7 +16,6 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Service\Attribute\Required;
-use Throwable;
 
 abstract class AbstractBatchProcessor implements BatchProcessorInterface, ProcessorInterface, LoggerAwareInterface
 {
@@ -55,6 +54,7 @@ abstract class AbstractBatchProcessor implements BatchProcessorInterface, Proces
         try {
             $event = new Events\BatchConsumeEvent($messagesBatch, $context, static::class);
             $this->eventDispatcher->dispatch($event, Events::BATCH_CONSUME__START);
+
             try {
                 $results = $this->doProcess($messagesBatch, $context);
             } catch (InterruptProcessingException $exception) {
@@ -66,7 +66,7 @@ abstract class AbstractBatchProcessor implements BatchProcessorInterface, Proces
 
             $processedResult = array_map(
                 function (Result $result) use ($messagesBatch, $context): Result {
-                    if ($result->getOpResult() === self::REQUEUE) {
+                    if (self::REQUEUE === $result->getOpResult()) {
                         $resultAfterExceptionHandling = $this->chainExceptionHandler->handle(
                             $this,
                             $result->getException(),
@@ -86,7 +86,7 @@ abstract class AbstractBatchProcessor implements BatchProcessorInterface, Proces
                 },
                 $results
             );
-        } catch (Throwable $exception) {
+        } catch (\Throwable $exception) {
             $event = new Events\BatchExceptionConsumeEvent($exception, $messagesBatch, $context, static::class);
             $this->eventDispatcher->dispatch($event, Events::BATCH_CONSUME__EXCEPTION);
 
@@ -108,7 +108,6 @@ abstract class AbstractBatchProcessor implements BatchProcessorInterface, Proces
 
     /**
      * @param AmqpMessage[] $messages
-     * @param Context $session
      *
      * @return Result[]
      */

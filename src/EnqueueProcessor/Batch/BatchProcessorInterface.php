@@ -16,6 +16,7 @@ interface BatchProcessorInterface
 
     /**
      * @param AmqpMessage[] $messagesBatch
+     *
      * @return string[]
      *
      * @throws InterruptProcessingException

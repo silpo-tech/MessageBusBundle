@@ -13,9 +13,6 @@ class LogExtension implements MessageReceivedExtensionInterface, PostMessageRece
 {
     private bool $debug = false;
 
-    /**
-     * @param bool $debug
-     */
     public function __construct(bool $debug)
     {
         $this->debug = $debug;
@@ -23,7 +20,7 @@ class LogExtension implements MessageReceivedExtensionInterface, PostMessageRece
 
     public function onMessageReceived(MessageReceived $context): void
     {
-        if ($this->debug !== true) {
+        if (true !== $this->debug) {
             return;
         }
 
@@ -39,7 +36,7 @@ class LogExtension implements MessageReceivedExtensionInterface, PostMessageRece
 
     public function onPostMessageReceived(PostMessageReceived $context): void
     {
-        if ($this->debug !== true) {
+        if (true !== $this->debug) {
             return;
         }
 

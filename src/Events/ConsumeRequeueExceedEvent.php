@@ -6,7 +6,6 @@ namespace MessageBusBundle\Events;
 
 use Interop\Queue\Context;
 use Interop\Queue\Message;
-use MessageBusBundle\EnqueueProcessor\ProcessorInterface;
 use MessageBusBundle\Exception\RequeueException;
 
 class ConsumeRequeueExceedEvent

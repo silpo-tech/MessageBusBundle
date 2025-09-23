@@ -52,12 +52,6 @@ abstract class AbstractProcessor implements Processor, ProcessorInterface, Logge
         return $this;
     }
 
-    /**
-     * @param Message $message
-     * @param Context $context
-     *
-     * @return string
-     */
     public function process(Message $message, Context $context): string
     {
         try {
@@ -87,10 +81,6 @@ abstract class AbstractProcessor implements Processor, ProcessorInterface, Logge
     }
 
     /**
-     * @param         $body
-     * @param Message $message
-     * @param Context $session
-     *
      * @return string|void
      */
     abstract public function doProcess($body, Message $message, Context $session);

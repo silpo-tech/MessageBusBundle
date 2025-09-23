@@ -3,15 +3,14 @@
 namespace MessageBusBundle\EnqueueProcessor\Batch;
 
 use Enqueue\Consumption\Result as EnqueueResult;
-use Throwable;
 
 class Result
 {
     private int $deliveryTag;
     private string $opResult;
-    private ?Throwable $exception;
+    private ?\Throwable $exception;
 
-    private function __construct(int $deliveryTag, string $opResult, ?Throwable $exception = null)
+    private function __construct(int $deliveryTag, string $opResult, ?\Throwable $exception = null)
     {
         $this->deliveryTag = $deliveryTag;
         $this->opResult = $opResult;
@@ -28,7 +27,7 @@ class Result
         return new self($deliveryTag, EnqueueResult::REJECT);
     }
 
-    public static function requeue(int $deliveryTag, Throwable $exception): self
+    public static function requeue(int $deliveryTag, \Throwable $exception): self
     {
         return new self($deliveryTag, EnqueueResult::REQUEUE, $exception);
     }
@@ -43,7 +42,7 @@ class Result
         return $this->opResult;
     }
 
-    public function getException(): ?Throwable
+    public function getException(): ?\Throwable
     {
         return $this->exception;
     }

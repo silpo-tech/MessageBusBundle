@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace MessageBusBundle\EventSubscriber;
 
+use Interop\Queue\Message;
 use MessageBusBundle\Encoder\EncoderRegistry;
 use MessageBusBundle\Events;
 use MessageBusBundle\MessageBus;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Interop\Queue\Message;
 
 class EncodedMessageEventSubscriber implements EventSubscriberInterface
 {
@@ -16,7 +16,6 @@ class EncodedMessageEventSubscriber implements EventSubscriberInterface
 
     /**
      * PreConsumeEventSubscriber constructor.
-     * @param EncoderRegistry $encoderRegistry
      */
     public function __construct(EncoderRegistry $encoderRegistry)
     {
@@ -52,5 +51,4 @@ class EncodedMessageEventSubscriber implements EventSubscriberInterface
             $message->setProperty(MessageBus::ENCODING_HEADER, null);
         }
     }
-
 }

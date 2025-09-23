@@ -22,7 +22,7 @@ class DoctrineSubscriberPass implements CompilerPassInterface
                     $definition->addTag('kernel.event_subscriber');
                     $definition->setArguments([new Reference($definitionId)]);
                     $container->setDefinition(
-                        uniqid('doctrine.clear.listener.' . $definitionId . '.', true),
+                        uniqid('doctrine.clear.listener.'.$definitionId.'.', true),
                         $definition
                     );
                 }

@@ -16,13 +16,13 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class SentryProfilerEventSubscriber implements EventSubscriberInterface
 {
-    private Span|null $transaction = null;
+    private ?Span $transaction = null;
 
     public function startTransaction(BatchConsumeEvent $batchConsumeEvent): void
     {
         if (null === $this->transaction && class_exists(TransactionContext::class)) {
             $sentryTransactionContext = new TransactionContext();
-            $sentryTransactionContext->setName('MBus ' . $batchConsumeEvent->getProcessorClass());
+            $sentryTransactionContext->setName('MBus '.$batchConsumeEvent->getProcessorClass());
             $sentryTransactionContext->setOp('processor.batchProcess');
             $sentryTransactionContext->setTags([
                 'sf.messages' => count($batchConsumeEvent->getMessagesBatch()),
@@ -39,7 +39,7 @@ class SentryProfilerEventSubscriber implements EventSubscriberInterface
     {
         if (null === $this->transaction && class_exists(TransactionContext::class)) {
             $sentryTransactionContext = new TransactionContext();
-            $sentryTransactionContext->setName('MBus ' . $event->getProcessorClass());
+            $sentryTransactionContext->setName('MBus '.$event->getProcessorClass());
             $sentryTransactionContext->setOp('processor.process');
 
             $sentryTransaction = SentrySdk::getCurrentHub()->startTransaction($sentryTransactionContext);

@@ -92,7 +92,7 @@ class RequeueFailedCommandTest extends KernelTestCase
 
                     $phpClass = $processedMessages[0]->get_properties()['application_headers']['php.class_name'];
                     self::assertEquals('SDK\Product\DTO\ObjectDTO', $phpClass);
-                }
+                },
             ],
         ];
 
@@ -112,7 +112,7 @@ class RequeueFailedCommandTest extends KernelTestCase
                 'assert' => static fn (): callable => static function (): void {
                     self::assertCount(100, self::getMessagesFromQueue(self::DESTINATION_QUEUE_NAME));
                     self::assertCount(100, self::getMessagesFromQueue(self::SOURCE_QUEUE_NAME));
-                }
+                },
             ],
         ];
 
@@ -132,13 +132,13 @@ class RequeueFailedCommandTest extends KernelTestCase
                 'assert' => static fn (): callable => static function (): void {
                     self::assertCount(33, self::getMessagesFromQueue(self::DESTINATION_QUEUE_NAME));
                     self::assertCount(67, self::getMessagesFromQueue(self::SOURCE_QUEUE_NAME));
-                }
+                },
             ],
         ];
 
         yield 'only messages with specified correlationId are moved' => [
             'data' => [
-                'input' => static fn (): callable => static function(): array {
+                'input' => static fn (): callable => static function (): array {
                     self::$correlationIds = array_rand(self::$fixtures, 7);
 
                     return
@@ -169,7 +169,7 @@ class RequeueFailedCommandTest extends KernelTestCase
                     ksort($processedCorrelationIds);
 
                     self::assertEquals($processedCorrelationIds, self::$correlationIds);
-                }
+                },
             ],
         ];
     }
@@ -320,15 +320,15 @@ class RequeueFailedCommandTest extends KernelTestCase
         $channel = self::getContainer()->get(Context::class)->getLibChannel();
 
         $messages = [];
-        do {
+        while (true) {
             $message = $channel->basic_get($queue);
-            if ($message === null) {
+            if (null === $message) {
                 break;
             }
 
             $messages[] = $message;
-        } while (true);
-        
+        }
+
         return $messages;
     }
 }

@@ -6,5 +6,4 @@ namespace MessageBusBundle\Exception;
 
 class RejectException extends MessageBusException
 {
-
 }

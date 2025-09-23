@@ -12,7 +12,7 @@ class ValidationException extends MessageBusException
         string $message = '',
         iterable $violations = [],
         int $code = 0,
-        \Throwable|null $previous = null,
+        ?\Throwable $previous = null,
     ) {
         parent::__construct($message, $code, $previous);
         $this->violations = $violations;

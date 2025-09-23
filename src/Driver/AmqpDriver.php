@@ -12,7 +12,7 @@ use Psr\Log\LoggerInterface;
 
 class AmqpDriver extends BaseAmqpDriver
 {
-    public function setupBroker(LoggerInterface|null $logger = null): void
+    public function setupBroker(?LoggerInterface $logger = null): void
     {
         parent::setupBroker($logger);
 

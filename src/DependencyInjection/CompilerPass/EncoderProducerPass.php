@@ -30,9 +30,9 @@ class EncoderProducerPass implements CompilerPassInterface
             $encoderProducerDefinition = new Definition();
             $encoderProducerDefinition->setClass(EncoderProducer::class)
                 ->setArguments([
-                   $container->getDefinition(ProducerInterface::class),
-                   $defaultEncoderDefinition,
-               ])
+                    $container->getDefinition(ProducerInterface::class),
+                    $defaultEncoderDefinition,
+                ])
             ;
 
             $container->setDefinition(EncoderProducerInterface::class, $encoderProducerDefinition);

@@ -12,7 +12,7 @@ class StubProducer implements ProducerInterface, EncoderProducerInterface
 
     private array $queues = [];
 
-    public function send(string $topic, string $message, array $headers = [], int $delay = 0, string|null $exchange = null): self
+    public function send(string $topic, string $message, array $headers = [], int $delay = 0, ?string $exchange = null): self
     {
         $this->topics[$topic][] = ['message' => $message, 'headers' => $headers];
 
@@ -26,7 +26,7 @@ class StubProducer implements ProducerInterface, EncoderProducerInterface
         return $this;
     }
 
-    public function sendMessage(string $topic, Message $message, int $delay = 0, string|null $exchange = null): ProducerInterface
+    public function sendMessage(string $topic, Message $message, int $delay = 0, ?string $exchange = null): ProducerInterface
     {
         $this->topics[$topic][] = ['message' => $message, 'headers' => []];
 

@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace MessageBusBundle\Exception;
 
-use Exception;
-
-class InterruptProcessingException extends Exception
+class InterruptProcessingException extends \Exception
 {
     private array $result;
 

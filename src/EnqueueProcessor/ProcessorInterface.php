@@ -14,8 +14,6 @@ interface ProcessorInterface
      * 'queuename' => [
      *    ['routingKey'=>'routingKey1', 'exchange' => 'exchangeName'],
      * ]
-     *
-     * @return array
      */
     public function getSubscribedRoutingKeys(): array;
 }

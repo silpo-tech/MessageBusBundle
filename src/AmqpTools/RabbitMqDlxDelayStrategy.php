@@ -15,9 +15,7 @@ use Interop\Queue\Exception\InvalidDestinationException;
 class RabbitMqDlxDelayStrategy implements DelayStrategy
 {
     private const EXPIRES = 60000;
-    /**
-     * {@inheritdoc}
-     */
+
     public function delayMessage(AmqpContext $context, AmqpDestination $dest, AmqpMessage $message, int $delay): void
     {
         $properties = $message->getProperties();
@@ -37,19 +35,16 @@ class RabbitMqDlxDelayStrategy implements DelayStrategy
             $delayQueue->setArgument('x-message-ttl', $delay);
             $delayQueue->setArgument('x-dead-letter-exchange', $dest->getTopicName());
             $delayQueue->setArgument('x-expires', $delay + self::EXPIRES);
-            $delayQueue->setArgument('x-dead-letter-routing-key', (string)$delayMessage->getRoutingKey());
+            $delayQueue->setArgument('x-dead-letter-routing-key', (string) $delayMessage->getRoutingKey());
         } elseif ($dest instanceof AmqpQueue) {
-            $delayQueue = $context->createQueue($dest->getQueueName() . '.' . $delay . '.delayed');
+            $delayQueue = $context->createQueue($dest->getQueueName().'.'.$delay.'.delayed');
             $delayQueue->addFlag(AmqpQueue::FLAG_DURABLE);
             $delayQueue->setArgument('x-message-ttl', $delay);
             $delayQueue->setArgument('x-expires', $delay + self::EXPIRES);
             $delayQueue->setArgument('x-dead-letter-exchange', '');
             $delayQueue->setArgument('x-dead-letter-routing-key', $dest->getQueueName());
         } else {
-            throw new InvalidDestinationException(sprintf('The destination must be an instance of %s but got %s.',
-                AmqpTopic::class . '|' . AmqpQueue::class,
-                get_class($dest)
-            ));
+            throw new InvalidDestinationException(sprintf('The destination must be an instance of %s but got %s.', AmqpTopic::class.'|'.AmqpQueue::class, get_class($dest)));
         }
 
         $context->declareQueue($delayQueue);

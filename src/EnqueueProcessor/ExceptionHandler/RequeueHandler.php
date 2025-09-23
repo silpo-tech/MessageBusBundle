@@ -15,7 +15,6 @@ use MessageBusBundle\Exception\RequeueException;
 use MessageBusBundle\Producer\ProducerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
-use Throwable;
 
 class RequeueHandler implements ExceptionHandlerInterface
 {
@@ -40,19 +39,15 @@ class RequeueHandler implements ExceptionHandlerInterface
 
     /**
      * @param RequeueException $exception
-     * @param Message $message
-     * @param Context $context
-     * @param ProcessorInterface $processor
-     * @return string
      */
     public function handle(
-        Throwable $exception,
+        \Throwable $exception,
         Message $message,
         Context $context,
         ProcessorInterface $processor,
     ): string {
         $count = $message->getProperty(self::REQUEUE_COUNT_KEY, 0);
-        $count++;
+        ++$count;
         $message->setProperty(self::REQUEUE_COUNT_KEY, $count);
         $message->setProperty(self::REQUEUE_REASON, $exception->getMessage());
 
@@ -60,7 +55,7 @@ class RequeueHandler implements ExceptionHandlerInterface
             'reason' => $exception->getMessage(),
             'trace' => $this->getExceptionTraceTrait($exception),
             'message' => $message->getBody(),
-            'correlationId' => (string)$message->getCorrelationId()
+            'correlationId' => (string) $message->getCorrelationId(),
         ];
 
         $queueName = $this->getQueueName($processor);
@@ -83,14 +78,14 @@ class RequeueHandler implements ExceptionHandlerInterface
         return Processor::ACK;
     }
 
-    public function supports(Throwable $exception): bool
+    public function supports(\Throwable $exception): bool
     {
         return $exception instanceof RequeueException;
     }
 
     protected function createFailedQueueName(string $queueName): string
     {
-        return $queueName . $this->config->getSeparator() . self::REQUEUE_FAILED_QUEUE;
+        return $queueName.$this->config->getSeparator().self::REQUEUE_FAILED_QUEUE;
     }
 
     private function getQueueName(ProcessorInterface $processor): string

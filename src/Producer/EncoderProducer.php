@@ -14,8 +14,6 @@ class EncoderProducer implements ProducerInterface, EncoderProducerInterface
     private EncoderInterface $encoder;
 
     /**
-     * @param ProducerInterface $producer
-     *
      * @todo Set Encoder via config
      */
     public function __construct(ProducerInterface $producer, EncoderInterface $encoder)
@@ -84,7 +82,7 @@ class EncoderProducer implements ProducerInterface, EncoderProducerInterface
     private function encode(string $message): string
     {
         $data = $this->encoder->encode($message);
-        if ($data === null) {
+        if (null === $data) {
             throw new \InvalidArgumentException('Invalid message. Cannot encode this string');
         }
 

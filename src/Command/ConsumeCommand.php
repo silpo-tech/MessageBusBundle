@@ -8,6 +8,7 @@ use Enqueue\ProcessorRegistryInterface;
 use Enqueue\Symfony\Consumption\ChooseLoggerCommandTrait;
 use Enqueue\Symfony\Consumption\LimitsExtensionsCommandTrait;
 use MessageBusBundle\AmqpTools\RabbitMqQueueManager;
+use MessageBusBundle\EnqueueProcessor\OptionsProcessorInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Console\Command\Command;
@@ -15,7 +16,6 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use MessageBusBundle\EnqueueProcessor\OptionsProcessorInterface;
 
 class ConsumeCommand extends Command
 {
@@ -68,8 +68,8 @@ class ConsumeCommand extends Command
         $this->configureLoggerExtension();
 
         $this
-            ->setDescription('A worker that consumes message from a broker. ' .
-                'To use this broker you have to explicitly set a queue to consume from ' .
+            ->setDescription('A worker that consumes message from a broker. '.
+                'To use this broker you have to explicitly set a queue to consume from '.
                 'and a message processor service')
             ->addArgument('processor', InputArgument::REQUIRED, 'A message processor.')
             ->addOption('transport', 't', InputOption::VALUE_OPTIONAL, 'The transport to consume messages from.', $this->defaultTransport)

@@ -9,8 +9,6 @@ trait EncoderRegistryAwareTrait
     protected EncoderRegistry $encoderRegistry;
 
     /**
-     * @param EncoderRegistry $encoderRegistry
-     *
      * @return EncoderRegistryAwareTrait
      */
     public function setEncoderRegistry(EncoderRegistry $encoderRegistry): self

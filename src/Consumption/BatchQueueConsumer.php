@@ -42,7 +42,7 @@ final class BatchQueueConsumer implements BatchQueueConsumerInterface
     public function __construct(
         array $interopContexts,
         array $boundProcessors = [],
-        LoggerInterface|null $logger = null,
+        ?LoggerInterface $logger = null,
         int $receiveTimeout = 10000,
         int $batchSize = PHP_INT_MAX
     ) {
@@ -109,9 +109,7 @@ final class BatchQueueConsumer implements BatchQueueConsumerInterface
         $this->logger = $initLogger->getLogger();
 
         if (empty($this->boundProcessors)) {
-            throw new \LogicException(
-                'There is nothing to consume. It is required to bind something before calling consume method.'
-            );
+            throw new \LogicException('There is nothing to consume. It is required to bind something before calling consume method.');
         }
 
         /** @var Consumer[] $consumers */
@@ -147,7 +145,6 @@ final class BatchQueueConsumer implements BatchQueueConsumerInterface
                 return true;
             };
 
-
             $subscriptionConsumer->subscribe($consumer, $callback);
         }
 
@@ -171,9 +168,7 @@ final class BatchQueueConsumer implements BatchQueueConsumerInterface
     }
 
     /**
-     * @param SubscriptionConsumer $fallbackSubscriptionConsumer
      * @internal
-     *
      */
     public function setFallbackSubscriptionConsumer(SubscriptionConsumer $fallbackSubscriptionConsumer): void
     {
@@ -187,9 +182,7 @@ final class BatchQueueConsumer implements BatchQueueConsumerInterface
     {
         $queue = $consumer->getQueue();
         if (false === array_key_exists($queue->getQueueName(), $this->boundProcessors)) {
-            throw new \LogicException(
-                sprintf('The processor for the queue "%s" could not be found.', $queue->getQueueName())
-            );
+            throw new \LogicException(sprintf('The processor for the queue "%s" could not be found.', $queue->getQueueName()));
         }
 
         $processor = $this->boundProcessors[$queue->getQueueName()]->getProcessor();
@@ -206,14 +199,17 @@ final class BatchQueueConsumer implements BatchQueueConsumerInterface
                 case Result::ACK:
                     $consumer->acknowledge($this->messageBatch[$messageRes->getDeliveryTag()]);
                     unset($this->messageBatch[$messageRes->getDeliveryTag()]);
+
                     break;
                 case Result::REJECT:
                     $consumer->reject($this->messageBatch[$messageRes->getDeliveryTag()]);
                     unset($this->messageBatch[$messageRes->getDeliveryTag()]);
+
                     break;
                 case Result::REQUEUE:
                     $consumer->reject($this->messageBatch[$messageRes->getDeliveryTag()], true);
                     unset($this->messageBatch[$messageRes->getDeliveryTag()]);
+
                     break;
                 case Result::ALREADY_ACKNOWLEDGED:
                     break;

@@ -93,7 +93,7 @@ class RequeueFailedCommand extends Command
 
         $totalMessagesCounter = 0;
         $processedMessagesCounter = 0;
-        $messagesLimit = (int)($input->getOption(self::OPTION_MESSAGE_LIMIT) ?? self::MESSAGES_LIMIT);
+        $messagesLimit = (int) ($input->getOption(self::OPTION_MESSAGE_LIMIT) ?? self::MESSAGES_LIMIT);
         $correlationIds = $input->getOption(self::OPTION_CORRELATION_IDS);
 
         $io->progressStart($correlationIds ? sizeof($correlationIds) : $messagesLimit);
@@ -102,7 +102,7 @@ class RequeueFailedCommand extends Command
 
         do {
             $message = $channel->basic_get($input->getArgument(self::ARGUMENT_SOURCE_QUEUE));
-            if ($message === null) {
+            if (null === $message) {
                 break;
             }
 
@@ -111,7 +111,7 @@ class RequeueFailedCommand extends Command
                 continue;
             }
 
-            $totalMessagesCounter++;
+            ++$totalMessagesCounter;
 
             if ($correlationIds) {
                 $messageCorrelationId = $this->getCorrelationId($message);
@@ -124,7 +124,7 @@ class RequeueFailedCommand extends Command
             }
 
             $this->publish($input->getArgument(self::ARGUMENT_DESTINATION_QUEUE), $message);
-            $processedMessagesCounter ++;
+            ++$processedMessagesCounter;
 
             if ($input->getOption(self::OPTION_ACK)) {
                 $message->ack();
@@ -139,7 +139,7 @@ class RequeueFailedCommand extends Command
 
         $io->newLine();
 
-        $io->info(sprintf("Messages processed: %s", $processedMessagesCounter));
+        $io->info(sprintf('Messages processed: %s', $processedMessagesCounter));
 
         return Command::SUCCESS;
     }
@@ -147,7 +147,7 @@ class RequeueFailedCommand extends Command
     private function validateInput(InputInterface $input, AMQPChannel $channel, SymfonyStyle $io): bool
     {
         $sourceQueue = $input->getArgument(self::ARGUMENT_SOURCE_QUEUE);
-        if ($sourceQueue === null) {
+        if (null === $sourceQueue) {
             $io->error('Source queue is not specified');
 
             return false;
@@ -159,20 +159,20 @@ class RequeueFailedCommand extends Command
             return false;
         }
 
-        if ($input->getArgument(self::ARGUMENT_DESTINATION_QUEUE) === null) {
+        if (null === $input->getArgument(self::ARGUMENT_DESTINATION_QUEUE)) {
             $io->error('Destination queue is not specified');
 
             return false;
         }
 
-        if ($input->getArgument(self::ARGUMENT_ROUTING_KEY) === null) {
+        if (null === $input->getArgument(self::ARGUMENT_ROUTING_KEY)) {
             $io->error('Routing key is not specified');
 
             return false;
         }
 
         $limit = $input->getOption(self::OPTION_MESSAGE_LIMIT);
-        if ($limit !== null & !is_numeric($limit)) {
+        if (null !== $limit & !is_numeric($limit)) {
             $io->error('The messages limit option (-l) must be a number');
 
             return false;
@@ -189,14 +189,15 @@ class RequeueFailedCommand extends Command
 
         return true;
     }
-    private function getCorrelationId(AMQPMessage $message): string|null
+
+    private function getCorrelationId(AMQPMessage $message): ?string
     {
         $properties = $message->get_properties();
 
         return $properties['correlation_id'] ?? null;
     }
 
-    private function getHeaderValue(AMQPMessage $message, string $key): string|null
+    private function getHeaderValue(AMQPMessage $message, string $key): ?string
     {
         $properties = $message->get_properties();
 
@@ -232,6 +233,4 @@ class RequeueFailedCommand extends Command
             $message->reject();
         }
     }
-
-
 }

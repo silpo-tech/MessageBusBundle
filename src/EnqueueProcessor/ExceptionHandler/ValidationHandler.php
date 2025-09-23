@@ -13,7 +13,6 @@ use MessageBusBundle\Exception\ValidationException;
 use MessageBusBundle\Producer\ProducerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Validator\ConstraintViolation;
-use Throwable;
 
 class ValidationHandler implements ExceptionHandlerInterface
 {
@@ -33,7 +32,7 @@ class ValidationHandler implements ExceptionHandlerInterface
     }
 
     public function handle(
-        Throwable $exception,
+        \Throwable $exception,
         Message $message,
         Context $context,
         ProcessorInterface $processor,
@@ -43,7 +42,7 @@ class ValidationHandler implements ExceptionHandlerInterface
             'reason' => $exception->getMessage(),
             'violations' => $this->adoptViolations($exception->getViolations()),
             'message' => json_decode($message->getBody()),
-            'correlationId' => (string) $message->getCorrelationId()
+            'correlationId' => (string) $message->getCorrelationId(),
         ];
 
         $this->producer->sendToQueue(
@@ -63,7 +62,7 @@ class ValidationHandler implements ExceptionHandlerInterface
 
     protected function createQueueName(): string
     {
-        return $this->config->getApp() . $this->config->getSeparator() . self::QUEUE_SUFFIX;
+        return $this->config->getApp().$this->config->getSeparator().self::QUEUE_SUFFIX;
     }
 
     private function adoptViolations(iterable $violations)
@@ -72,10 +71,12 @@ class ValidationHandler implements ExceptionHandlerInterface
         foreach ($violations as $key => $value) {
             if (is_iterable($value)) {
                 $result[$key] = $this->adoptViolations($value);
+
                 continue;
             }
             if ($value instanceof ConstraintViolation) {
                 $result[$key][$value->getPropertyPath()] = $value->getMessage();
+
                 continue;
             }
             $result[$key] = $value;

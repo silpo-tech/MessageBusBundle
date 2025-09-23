@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace MessageBusBundle\Producer;
 
-use MessageBusBundle\AmqpTools\RabbitMqDlxDelayStrategy;
 use Enqueue\Client\Config;
 use Enqueue\ConnectionFactoryFactoryInterface;
 use Interop\Amqp\AmqpQueue;
@@ -12,6 +11,7 @@ use Interop\Queue\Context;
 use Interop\Queue\Destination;
 use Interop\Queue\Message;
 use Interop\Queue\Producer;
+use MessageBusBundle\AmqpTools\RabbitMqDlxDelayStrategy;
 use MessageBusBundle\Events;
 use MessageBusBundle\Events\PrePublishEvent;
 use MessageBusBundle\MessageBus;
@@ -40,11 +40,6 @@ class EnqueueProducer implements ProducerInterface, LoggerAwareInterface
 
     private string $topicName;
 
-    /**
-     * @param Config                            $config
-     * @param ConnectionFactoryFactoryInterface $factory
-     * @param EventDispatcherInterface          $eventDispatcher
-     */
     public function __construct(
         Config $config,
         ConnectionFactoryFactoryInterface $factory,
@@ -59,10 +54,6 @@ class EnqueueProducer implements ProducerInterface, LoggerAwareInterface
     }
 
     /**
-     * @param string      $topic
-     * @param string      $message
-     * @param array       $headers
-     * @param int         $delay
      * @param string|null $exchange
      *
      * @return $this
@@ -73,9 +64,6 @@ class EnqueueProducer implements ProducerInterface, LoggerAwareInterface
     }
 
     /**
-     * @param string      $topic
-     * @param Message     $message
-     * @param int         $delay
      * @param string|null $exchange
      *
      * @return $this
@@ -85,18 +73,13 @@ class EnqueueProducer implements ProducerInterface, LoggerAwareInterface
         $message->setRoutingKey($topic);
         $message->setProperty(self::TOPIC_NAME, $topic);
 
-        //create topic
+        // create topic
         $destination = $this->context->createTopic($exchange ?? $this->topicName);
 
         return $this->doSend($destination, $message, $delay);
     }
 
     /**
-     * @param string $queue
-     * @param string $message
-     * @param array  $headers
-     * @param int    $delay
-     *
      * @return $this
      */
     public function sendToQueue(string $queue, string $message, array $headers = [], int $delay = 0): self
@@ -105,16 +88,13 @@ class EnqueueProducer implements ProducerInterface, LoggerAwareInterface
     }
 
     /**
-     * @param string $queue
      * @param string $message
-     * @param array  $headers
-     * @param int    $delay
      *
      * @return $this
      */
     public function sendMessageToQueue(string $queue, Message $message, int $delay = 0): self
     {
-        //create destination eueue
+        // create destination eueue
         $destination = $this->context->createQueue($queue);
         if ($destination instanceof AmqpQueue) {
             $destination->addFlag(AmqpQueue::FLAG_DURABLE);
@@ -124,10 +104,6 @@ class EnqueueProducer implements ProducerInterface, LoggerAwareInterface
     }
 
     /**
-     * @param Destination $destination
-     * @param Message     $message
-     * @param int         $delay
-     *
      * @return $this
      */
     public function doSend(Destination $destination, Message $message, int $delay = 0): self
@@ -135,7 +111,7 @@ class EnqueueProducer implements ProducerInterface, LoggerAwareInterface
         $this->eventDispatcher->dispatch(new PrePublishEvent($message), Events::PRODUCER__PRE_PUBLISH);
 
         $attempt = 0;
-        do {
+        while (true) {
             try {
                 if ($destination instanceof AmqpQueue) {
                     $this->context->declareQueue($destination);
@@ -144,7 +120,7 @@ class EnqueueProducer implements ProducerInterface, LoggerAwareInterface
 
                 return $this;
             } catch (\Exception $ex) {
-                $attempt++;
+                ++$attempt;
 
                 $this->logger->debug('EnqueueProducer send attempt', ['errorMessage' => $ex->getMessage(), 'attempt' => $attempt, 'correlationId' => (string) $message->getCorrelationId()]);
 
@@ -160,15 +136,9 @@ class EnqueueProducer implements ProducerInterface, LoggerAwareInterface
                     usleep(pow(2, $attempt) * self::WAIT_BEFORE_RETRY);
                 }
             }
-        } while (true);
+        }
     }
 
-    /**
-     * @param string $message
-     * @param array  $headers
-     *
-     * @return Message
-     */
     private function createMessage(string $message, array $headers = []): Message
     {
         $message = $this->context->createMessage($message);
@@ -177,18 +147,13 @@ class EnqueueProducer implements ProducerInterface, LoggerAwareInterface
             $message->setProperty($key, $value);
         }
 
-        if(!$message->getCorrelationId()) {
+        if (!$message->getCorrelationId()) {
             $message->setCorrelationId(UuidV6::generate());
         }
 
         return $message;
     }
 
-    /**
-     * @param int $delay
-     *
-     * @return Producer
-     */
     private function createProducer(int $delay = 0): Producer
     {
         $producer = $this->context->createProducer();
@@ -201,11 +166,6 @@ class EnqueueProducer implements ProducerInterface, LoggerAwareInterface
         return $producer;
     }
 
-    /**
-     * @param Config $config
-     *
-     * @return string
-     */
     private function createTopicName(Config $config): string
     {
         return strtolower(implode($config->getSeparator(), array_filter([$config->getPrefix(), $config->getRouterTopic()])));
