@@ -8,6 +8,7 @@ use Enqueue\ProcessorRegistryInterface;
 use Enqueue\Symfony\Consumption\ChooseLoggerCommandTrait;
 use Enqueue\Symfony\Consumption\LimitsExtensionsCommandTrait;
 use MessageBusBundle\AmqpTools\RabbitMqQueueManager;
+use MessageBusBundle\EnqueueProcessor\AbstractProcessor;
 use MessageBusBundle\EnqueueProcessor\OptionsProcessorInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -87,6 +88,7 @@ class ConsumeCommand extends Command
             throw new \LogicException(sprintf('Transport "%s" is not supported.', $transport), null, $e);
         }
 
+        /** @var AbstractProcessor $processor */
         $processor = $this->getProcessorRegistry($transport)->get($input->getArgument('processor'));
 
         if ($processor instanceof OptionsProcessorInterface) {

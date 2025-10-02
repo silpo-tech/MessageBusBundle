@@ -19,7 +19,7 @@ class RabbitMqQueueManager
     {
         if ($this->context instanceof AmqpContext) {
             $queue = $this->context->createQueue($queueName);
-            $queue->setFlags(AMQP_DURABLE);
+            $queue->setFlags(\AMQP_DURABLE);
             $this->context->declareQueue($queue);
 
             foreach ($routingKeys as $routingKey) {
@@ -31,7 +31,7 @@ class RabbitMqQueueManager
                     $exchangeName = MessageBus::DEFAULT_EXCHANGE;
                 }
                 $exchange = $this->context->createTopic($exchangeName);
-                $exchange->setFlags(AMQP_DURABLE);
+                $exchange->setFlags(\AMQP_DURABLE);
                 $this->context->declareTopic($exchange);
                 $this->context->bind(new AmqpBind($exchange, $queue, $routingKeyName));
             }

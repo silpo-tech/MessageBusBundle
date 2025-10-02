@@ -6,6 +6,8 @@ namespace MessageBusBundle\Tests;
 
 use Enqueue\Bundle\EnqueueBundle;
 use MessageBusBundle\MessageBusBundle;
+use MessageBusBundle\Tests\Stub\Processor\TestBatchProcessor;
+use MessageBusBundle\Tests\Stub\Processor\TestProcessor;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
@@ -29,7 +31,6 @@ class Kernel extends BaseKernel
         ]);
 
         $container->extension('message_bus', []);
-
         $container->extension('enqueue', [
             'default' => [
                 'transport' => [
@@ -40,5 +41,13 @@ class Kernel extends BaseKernel
                 ],
             ],
         ]);
+
+        $container->services()
+            ->set(TestBatchProcessor::class)
+            ->tag('messagesbus.batch_processor', ['key' => 'test.batch.processor']);
+
+        $container->services()
+            ->set(TestProcessor::class)
+            ->tag('enqueue.transport.processor', ['processor' => 'test.processor']);
     }
 }
