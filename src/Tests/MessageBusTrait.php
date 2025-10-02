@@ -28,6 +28,7 @@ trait MessageBusTrait
     {
         return self::getContainer()
             ->get($processorClass)
+            // @phpstan-ignore-next-line
             ->doProcess($body, new AmqpMessage(json_encode($body), $properties, $headers), $this->prophesize(AmqpContext::class)->reveal());
     }
 
@@ -47,6 +48,7 @@ trait MessageBusTrait
 
         return self::getContainer()
             ->get($processorClass)
+            // @phpstan-ignore-next-line
             ->process(new AmqpMessage($body, $properties, $headers), $this->prophesize(AmqpContext::class)->reveal());
     }
 }

@@ -17,12 +17,12 @@ class ConsoleSubscriber implements EventSubscriberInterface
     {
     }
 
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [ConsoleEvents::COMMAND => 'onConsoleCommand'];
     }
 
-    public function onConsoleCommand(ConsoleCommandEvent $event)
+    public function onConsoleCommand(ConsoleCommandEvent $event): void
     {
         if ($event->getCommand() instanceof ConsumeCommand || $event->getCommand() instanceof BatchConsumeCommand) {
             foreach ($this->allowOptions as $allowOption) {

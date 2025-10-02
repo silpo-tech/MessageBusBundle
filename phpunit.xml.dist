@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- https://phpunit.de/manual/current/en/appendixes.configuration.html -->
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
          backupGlobals="false"
@@ -7,22 +6,37 @@
          cacheResult="false"
          cacheDirectory=".phpunit.cache"
          testdox="true"
-         bootstrap="tests/bootstrap.php">
+         bootstrap="tests/bootstrap.php"
+>
     <coverage/>
     <php>
         <env name="KERNEL_CLASS" value="MessageBusBundle\Tests\Kernel"/>
         <env name="APP_ENV" value="test" force="true"/>
-        <env name="APP_DEBUG" value="yes" force="true"/>
+        <env name="APP_DEBUG" value="true" force="true"/>
         <env name="SYMFONY_DEPRECATIONS_HELPER" value="disabled=1"/>
     </php>
+
     <source>
         <include>
             <directory>./src/</directory>
         </include>
+        <exclude>
+            <file>./src/MessageBusBundle.php</file>
+            <directory>./src/Tests/</directory>
+            <directory>./src/Exception/</directory>
+            <directory>./src/Contracts/</directory>
+            <directory>./src/Resources/</directory>
+            <directory>./src/Traits/</directory>
+            <directory>./src/Events/</directory>
+        </exclude>
     </source>
+
     <testsuites>
-        <testsuite name="Tests">
-            <directory>./tests/</directory>
+        <testsuite name="Unit">
+            <directory>./tests/TestCase/Unit</directory>
+        </testsuite>
+        <testsuite name="Integration">
+            <directory>./tests/TestCase/Integration</directory>
         </testsuite>
     </testsuites>
 </phpunit>

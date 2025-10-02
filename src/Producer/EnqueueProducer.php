@@ -38,8 +38,6 @@ class EnqueueProducer implements ProducerInterface, LoggerAwareInterface
 
     private EventDispatcherInterface $eventDispatcher;
 
-    private string $topicName;
-
     public function __construct(
         Config $config,
         ConnectionFactoryFactoryInterface $factory,
@@ -49,7 +47,6 @@ class EnqueueProducer implements ProducerInterface, LoggerAwareInterface
         $this->factory = $factory;
         $this->eventDispatcher = $eventDispatcher;
 
-        $this->topicName = $this->createTopicName($config);
         $this->context = $this->factory->create($this->config->getTransportOptions())->createContext();
     }
 
@@ -74,7 +71,7 @@ class EnqueueProducer implements ProducerInterface, LoggerAwareInterface
         $message->setProperty(self::TOPIC_NAME, $topic);
 
         // create topic
-        $destination = $this->context->createTopic($exchange ?? $this->topicName);
+        $destination = $this->context->createTopic($exchange);
 
         return $this->doSend($destination, $message, $delay);
     }
@@ -164,11 +161,6 @@ class EnqueueProducer implements ProducerInterface, LoggerAwareInterface
         }
 
         return $producer;
-    }
-
-    private function createTopicName(Config $config): string
-    {
-        return strtolower(implode($config->getSeparator(), array_filter([$config->getPrefix(), $config->getRouterTopic()])));
     }
 
     /**

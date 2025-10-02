@@ -54,6 +54,8 @@ abstract class AbstractProcessor implements Processor, ProcessorInterface, Logge
 
     public function process(Message $message, Context $context): string
     {
+        $body = $message->getBody();
+
         try {
             $event = new Events\PreConsumeEvent($message, $context, static::class);
             $this->eventDispatcher->dispatch($event, Events::CONSUME__PRE_START);
