@@ -3,7 +3,7 @@
 namespace MessageBusBundle\Command;
 
 use MessageBusBundle\AmqpTools\RabbitMqQueueManager;
-use MessageBusBundle\Consumption\BatchQueueConsumer;
+use MessageBusBundle\Consumption\BatchQueueConsumerInterface;
 use MessageBusBundle\Enqueue\BatchProcessorRegistryInterface;
 use MessageBusBundle\EnqueueProcessor\Batch\AbstractBatchProcessor;
 use MessageBusBundle\EnqueueProcessor\OptionsProcessorInterface;
@@ -18,12 +18,12 @@ class BatchConsumeCommand extends Command
 {
     protected static $defaultName = 'messagebus:batch:consume';
 
-    private BatchQueueConsumer $queueConsumer;
+    private BatchQueueConsumerInterface $queueConsumer;
     private BatchProcessorRegistryInterface $processorRegistry;
     private RabbitMqQueueManager $rmqQueueManager;
 
     public function __construct(
-        BatchQueueConsumer $queueConsumer,
+        BatchQueueConsumerInterface $queueConsumer,
         BatchProcessorRegistryInterface $processorRegistry,
         RabbitMqQueueManager $rmqQueueManager
     ) {
@@ -37,7 +37,7 @@ class BatchConsumeCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setDescription('A worker that consumes message from a broker. '.
+            ->setDescription('Consume messages in batches from a broker. '.
                 'To use this broker you have to explicitly set a queue to consume from '.
                 'and a message processor service')
             ->addArgument('processor', InputArgument::REQUIRED, 'A message processor.')

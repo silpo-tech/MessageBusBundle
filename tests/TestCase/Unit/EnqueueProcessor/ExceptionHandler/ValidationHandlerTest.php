@@ -15,6 +15,7 @@ use MessageBusBundle\Producer\ProducerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Validator\ConstraintViolation;
 
 class ValidationHandlerTest extends TestCase
 {
@@ -78,6 +79,95 @@ class ValidationHandlerTest extends TestCase
         $this->logger->expects($this->once())
             ->method('debug')
             ->with('Validation failed');
+
+        $result = $this->handler->handle($exception, $message, $context, $processor);
+
+        $this->assertEquals(Processor::ACK, $result);
+    }
+
+    public function testHandleWithConstraintViolations(): void
+    {
+        $violation = $this->createMock(ConstraintViolation::class);
+        $violation->method('getPropertyPath')->willReturn('field');
+        $violation->method('getMessage')->willReturn('Field is required');
+
+        $exception = new ValidationException('Validation failed', [$violation]);
+        $message = $this->createMock(Message::class);
+        $context = $this->createMock(Context::class);
+        $processor = $this->createMock(ProcessorInterface::class);
+
+        $message->method('getBody')->willReturn('{}');
+        $message->method('getCorrelationId')->willReturn('test-id');
+
+        $this->config->method('getApp')->willReturn('test_app');
+        $this->config->method('getSeparator')->willReturn('.');
+
+        $this->producer->expects($this->once())
+            ->method('sendToQueue')
+            ->with('test_app.failed', $this->callback(function ($body) {
+                $data = json_decode($body, true);
+
+                return isset($data['violations'][0]['field'])
+                       && 'Field is required' === $data['violations'][0]['field'];
+            }));
+
+        $result = $this->handler->handle($exception, $message, $context, $processor);
+
+        $this->assertEquals(Processor::ACK, $result);
+    }
+
+    public function testHandleWithNestedViolations(): void
+    {
+        $nestedViolations = ['nested' => 'error'];
+        $exception = new ValidationException('Validation failed', ['parent' => $nestedViolations]);
+        $message = $this->createMock(Message::class);
+        $context = $this->createMock(Context::class);
+        $processor = $this->createMock(ProcessorInterface::class);
+
+        $message->method('getBody')->willReturn('{}');
+        $message->method('getCorrelationId')->willReturn('test-id');
+
+        $this->config->method('getApp')->willReturn('test_app');
+        $this->config->method('getSeparator')->willReturn('.');
+
+        $this->producer->expects($this->once())
+            ->method('sendToQueue');
+
+        $result = $this->handler->handle($exception, $message, $context, $processor);
+
+        $this->assertEquals(Processor::ACK, $result);
+    }
+
+    public function testCreateQueueName(): void
+    {
+        $this->config->method('getApp')->willReturn('myapp');
+        $this->config->method('getSeparator')->willReturn('-');
+
+        $reflection = new \ReflectionClass($this->handler);
+        $method = $reflection->getMethod('createQueueName');
+        $method->setAccessible(true);
+
+        $result = $method->invoke($this->handler);
+
+        $this->assertEquals('myapp-failed', $result);
+    }
+
+    public function testAdoptViolationsWithSimpleValues(): void
+    {
+        $violations = ['field1' => 'error1', 'field2' => 'error2'];
+        $exception = new ValidationException('Validation failed', $violations);
+        $message = $this->createMock(Message::class);
+        $context = $this->createMock(Context::class);
+        $processor = $this->createMock(ProcessorInterface::class);
+
+        $message->method('getBody')->willReturn('{}');
+        $message->method('getCorrelationId')->willReturn('test-id');
+
+        $this->config->method('getApp')->willReturn('test');
+        $this->config->method('getSeparator')->willReturn('.');
+
+        $this->producer->expects($this->once())
+            ->method('sendToQueue');
 
         $result = $this->handler->handle($exception, $message, $context, $processor);
 

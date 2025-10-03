@@ -76,6 +76,8 @@ services:
       $batchSize: '%message_bus.batch_size.default%'
       $receiveTimeout: '%message_bus.batch.receive_timeout.default%'
 
+  MessageBusBundle\Consumption\BatchQueueConsumerInterface: '@MessageBusBundle\Consumption\BatchQueueConsumer'
+
   MessageBusBundle\Enqueue\ContainerBatchProcessorRegistry:
     $locator: !tagged_locator { tag: 'messagesbus.batch_processor', index_by: 'key' }
 

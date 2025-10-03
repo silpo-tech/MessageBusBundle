@@ -2,11 +2,15 @@
 
 namespace MessageBusBundle\Tests\TestCase\Unit\Consumption;
 
+use Interop\Amqp\AmqpMessage;
+use Interop\Queue\Consumer;
 use Interop\Queue\Context;
 use Interop\Queue\Queue;
 use Interop\Queue\SubscriptionConsumer;
+use MessageBusBundle\Consumption\BatchBoundProcessor;
 use MessageBusBundle\Consumption\BatchQueueConsumer;
 use MessageBusBundle\EnqueueProcessor\Batch\BatchProcessorInterface;
+use MessageBusBundle\EnqueueProcessor\Batch\Result as BatchResult;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -78,8 +82,7 @@ class BatchQueueConsumerTest extends TestCase
             ->with('test_queue')
             ->willReturn($queue);
 
-        $callback = function () {
-        };
+        $callback = function () {};
         $result = $this->consumer->bindCallback('test_queue', $callback);
 
         $this->assertSame($this->consumer, $result);
@@ -127,6 +130,67 @@ class BatchQueueConsumerTest extends TestCase
 
         $this->consumer->setFallbackSubscriptionConsumer($fallbackConsumer);
 
-        $this->expectNotToPerformAssertions();
+        $this->assertTrue(true);
+    }
+
+    public function testConstructorWithBoundProcessors(): void
+    {
+        $boundProcessor = new BatchBoundProcessor($this->createMock(Queue::class), $this->createMock(BatchProcessorInterface::class));
+        $consumer = new BatchQueueConsumer(
+            [$this->context],
+            [$boundProcessor],
+            $this->logger,
+            1000,
+            10
+        );
+
+        $this->assertInstanceOf(BatchQueueConsumer::class, $consumer);
+    }
+
+    public function testConstructorWithNullLogger(): void
+    {
+        $consumer = new BatchQueueConsumer(
+            [$this->context],
+            [],
+            null,
+            1000,
+            10
+        );
+
+        $this->assertInstanceOf(BatchQueueConsumer::class, $consumer);
+    }
+
+    public function testProcessBatchWithAckResult(): void
+    {
+        $queue = $this->createMock(Queue::class);
+        $queue->method('getQueueName')->willReturn('test_queue');
+
+        $consumer = $this->createMock(Consumer::class);
+        $consumer->method('getQueue')->willReturn($queue);
+
+        $message = $this->createMock(AmqpMessage::class);
+        $message->method('getDeliveryTag')->willReturn(1);
+
+        $processor = $this->createMock(BatchProcessorInterface::class);
+        $processor->expects($this->once())
+            ->method('process')
+            ->willReturn([BatchResult::ack(1)]);
+
+        $consumer->expects($this->once())
+            ->method('acknowledge')
+            ->with($message);
+
+        $this->consumer->bind($queue, $processor);
+
+        $reflection = new \ReflectionClass($this->consumer);
+        $method = $reflection->getMethod('processBatch');
+        $method->setAccessible(true);
+
+        $property = $reflection->getProperty('messageBatch');
+        $property->setAccessible(true);
+        $property->setValue($this->consumer, [1 => $message]);
+
+        $result = $method->invoke($this->consumer, $consumer);
+        $this->assertTrue($result);
     }
 }

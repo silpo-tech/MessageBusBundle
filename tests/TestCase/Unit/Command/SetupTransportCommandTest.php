@@ -144,11 +144,10 @@ class SetupTransportCommandTest extends TestCase
     {
         $this->command = new SetupTransportCommand($this->queueManager, []);
         $description = $this->command->getDescription();
+        $this->assertIsString($description);
 
         if (!empty($description)) {
             $this->assertStringContainsString('queue', strtolower($description));
-        } else {
-            $this->expectNotToPerformAssertions();
         }
     }
 

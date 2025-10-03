@@ -6,91 +6,202 @@ namespace MessageBusBundle\Tests\TestCase\Unit\EnqueueProcessor;
 
 use Interop\Queue\Context;
 use Interop\Queue\Message;
-use Interop\Queue\Processor;
+use MapperBundle\Mapper\MapperInterface;
 use MessageBusBundle\EnqueueProcessor\AbstractProcessor;
-use MessageBusBundle\Exception\RejectException;
-use MessageBusBundle\Exception\RequeueException;
+use MessageBusBundle\EnqueueProcessor\ExceptionHandler\ChainExceptionHandler;
+use MessageBusBundle\Service\ProducerService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class AbstractProcessorTest extends TestCase
 {
+    private MapperInterface|MockObject $mapper;
+    private ChainExceptionHandler|MockObject $chainExceptionHandler;
     private EventDispatcherInterface|MockObject $eventDispatcher;
+    private Context|MockObject $context;
+    private Message|MockObject $message;
     private TestProcessor $processor;
 
     protected function setUp(): void
     {
+        $this->mapper = $this->createMock(MapperInterface::class);
+        $this->chainExceptionHandler = $this->createMock(ChainExceptionHandler::class);
         $this->eventDispatcher = $this->createMock(EventDispatcherInterface::class);
-        $this->processor = new TestProcessor($this->eventDispatcher);
+        $this->context = $this->createMock(Context::class);
+        $this->message = $this->createMock(Message::class);
+
+        $this->processor = new TestProcessor();
+        $this->processor->setMapper($this->mapper);
+        $this->processor->setChainExceptionHandler($this->chainExceptionHandler);
+        $this->processor->setEventDispatcher($this->eventDispatcher);
+    }
+
+    public function testSetMapper(): void
+    {
+        $mapper = $this->createMock(MapperInterface::class);
+        $result = $this->processor->setMapper($mapper);
+
+        $this->assertSame($this->processor, $result);
+    }
+
+    public function testSetChainExceptionHandler(): void
+    {
+        $handler = $this->createMock(ChainExceptionHandler::class);
+        $result = $this->processor->setChainExceptionHandler($handler);
+
+        $this->assertSame($this->processor, $result);
+    }
+
+    public function testSetEventDispatcher(): void
+    {
+        $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+        $result = $this->processor->setEventDispatcher($eventDispatcher);
+
+        $this->assertSame($this->processor, $result);
+    }
+
+    public function testSetLogger(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $this->processor->setLogger($logger);
+
+        $this->assertTrue(true);
     }
 
     public function testProcessSuccess(): void
     {
-        $message = $this->createMock(Message::class);
-        $context = $this->createMock(Context::class);
+        $body = ['test' => 'data'];
+        $this->message->method('getBody')->willReturn(json_encode($body));
+        $this->message->method('getProperty')->willReturn(null);
 
-        $message->method('getBody')->willReturn('{"test": "data"}');
-        $message->method('getHeaders')->willReturn([]);
-        $message->method('getProperties')->willReturn([]);
-        $message->method('getProperty')->willReturn(null);
+        $this->processor->setDoProcessResult('ack');
 
-        $result = $this->processor->process($message, $context);
+        $this->eventDispatcher->expects($this->exactly(3))
+            ->method('dispatch');
 
-        $this->assertEquals(Processor::ACK, $result);
+        $result = $this->processor->process($this->message, $this->context);
+
+        $this->assertEquals('ack', $result);
     }
 
-    public function testProcessWithRequeueException(): void
+    public function testProcessWithClassHeader(): void
     {
-        $message = $this->createMock(Message::class);
-        $context = $this->createMock(Context::class);
+        $body = ['test' => 'data'];
+        $destinationClass = 'stdClass';
+        $convertedBody = new \stdClass();
 
-        $message->method('getBody')->willReturn('requeue');
-        $message->method('getHeaders')->willReturn([]);
-        $message->method('getProperties')->willReturn([]);
-        $message->method('getProperty')->willReturn(null);
+        $this->message->method('getBody')->willReturn(json_encode($body));
+        $this->message->expects($this->once())
+            ->method('getProperty')
+            ->with(ProducerService::CLASS_HEADER)
+            ->willReturn($destinationClass);
 
-        // The AbstractProcessor catches exceptions and delegates to chainExceptionHandler
-        // Since we don't have the handler set up, it will return ACK by default
-        $result = $this->processor->process($message, $context);
+        $this->mapper->expects($this->once())
+            ->method('convert')
+            ->with($body, $destinationClass)
+            ->willReturn($convertedBody);
 
-        // The actual result depends on the exception handler, not the processor
-        $this->assertContains($result, [Processor::ACK, Processor::REQUEUE, Processor::REJECT]);
+        $this->processor->setDoProcessResult('ack');
+
+        $result = $this->processor->process($this->message, $this->context);
+
+        $this->assertEquals('ack', $result);
     }
 
-    public function testGetSubscribedRoutingKeys(): void
+    public function testProcessWithException(): void
     {
-        $keys = $this->processor->getSubscribedRoutingKeys();
+        $exception = new \Exception('Test exception');
 
-        $this->assertEquals(['test.routing.key'], $keys);
+        $this->message->method('getBody')->willReturn('{}');
+        $this->message->method('getProperty')->willReturn(null);
+
+        $this->processor->setDoProcessException($exception);
+
+        $this->chainExceptionHandler->expects($this->once())
+            ->method('handle')
+            ->with($this->processor, $exception, $this->message, $this->context)
+            ->willReturn('reject');
+
+        $this->eventDispatcher->expects($this->atLeastOnce())
+            ->method('dispatch');
+
+        $result = $this->processor->process($this->message, $this->context);
+
+        $this->assertEquals('reject', $result);
+    }
+
+    public function testProcessReturnsAckByDefault(): void
+    {
+        $this->message->method('getBody')->willReturn('{}');
+        $this->message->method('getProperty')->willReturn(null);
+
+        $this->processor->setDoProcessResult(null);
+
+        $result = $this->processor->process($this->message, $this->context);
+
+        $this->assertEquals(AbstractProcessor::ACK, $result);
+    }
+
+    public function testTryConvertBodyWithExistingClass(): void
+    {
+        $source = ['test' => 'data'];
+        $destination = \stdClass::class;
+        $converted = new \stdClass();
+
+        $this->mapper->expects($this->once())
+            ->method('convert')
+            ->with($source, $destination)
+            ->willReturn($converted);
+
+        $result = $this->processor->tryConvertBodyPublic($source, $destination);
+
+        $this->assertSame($converted, $result);
+    }
+
+    public function testTryConvertBodyWithNonExistingClass(): void
+    {
+        $source = ['test' => 'data'];
+        $destination = 'NonExistentClass';
+
+        $result = $this->processor->tryConvertBodyPublic($source, $destination);
+
+        $this->assertSame($source, $result);
     }
 }
 
 class TestProcessor extends AbstractProcessor
 {
-    public function __construct(EventDispatcherInterface $eventDispatcher)
+    private $doProcessResult = 'ack';
+    private ?\Throwable $doProcessException = null;
+
+    public function setDoProcessResult($result): void
     {
-        $this->eventDispatcher = $eventDispatcher;
+        $this->doProcessResult = $result;
     }
 
-    public function doProcess($body, Message $message, Context $session): ?string
+    public function setDoProcessException(\Throwable $exception): void
     {
-        $bodyStr = is_string($body) ? $body : json_encode($body);
+        $this->doProcessException = $exception;
+    }
 
-        switch ($bodyStr) {
-            case 'requeue':
-                throw new RequeueException('Test requeue');
-            case 'reject':
-                throw new RejectException('Test reject');
-            case 'error':
-                throw new \Exception('Test error');
-            default:
-                return self::ACK;
+    public function doProcess($body, Message $message, Context $session)
+    {
+        if ($this->doProcessException) {
+            throw $this->doProcessException;
         }
+
+        return $this->doProcessResult;
     }
 
     public function getSubscribedRoutingKeys(): array
     {
-        return ['test.routing.key'];
+        return [];
+    }
+
+    public function tryConvertBodyPublic($source, $destination)
+    {
+        return $this->tryConvertBody($source, $destination);
     }
 }
