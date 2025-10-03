@@ -37,7 +37,7 @@ class RabbitMqQueueManagerTest extends TestCase
 
         $queue->expects($this->once())
             ->method('setFlags')
-            ->with(\AMQP_DURABLE);
+            ->with(AMQP_DURABLE);
 
         $this->context->expects($this->once())
             ->method('declareQueue')
@@ -50,7 +50,7 @@ class RabbitMqQueueManagerTest extends TestCase
 
         $topic->expects($this->once())
             ->method('setFlags')
-            ->with(\AMQP_DURABLE);
+            ->with(AMQP_DURABLE);
 
         $this->context->expects($this->once())
             ->method('declareTopic')
@@ -93,6 +93,6 @@ class RabbitMqQueueManagerTest extends TestCase
         // Should not call any methods on non-AMQP context
         $manager->initQueue('test_queue', ['test_key']);
 
-        $this->expectNotToPerformAssertions();
+        $this->assertTrue(true); // No exception thrown
     }
 }

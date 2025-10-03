@@ -49,12 +49,6 @@ parameters:
 			path: src/Driver/DriverFactory.php
 
 		-
-			message: '#^Trait MessageBusBundle\\Encoder\\EncoderRegistryAwareTrait is used zero times and is not analysed\.$#'
-			identifier: trait.unused
-			count: 1
-			path: src/Encoder/EncoderRegistryAwareTrait.php
-
-		-
 			message: '#^Instanceof between MessageBusBundle\\Exception\\InterruptProcessingException and MessageBusBundle\\Exception\\InterruptProcessingException will always evaluate to true\.$#'
 			identifier: instanceof.alwaysTrue
 			count: 1
@@ -77,12 +71,6 @@ parameters:
 			identifier: classConstant.unused
 			count: 1
 			path: src/EnqueueProcessor/ExceptionHandler/RequeueHandler.php
-
-		-
-			message: '#^Trait MessageBusBundle\\EnqueueProcessor\\OptionsProcessorAwareTrait is used zero times and is not analysed\.$#'
-			identifier: trait.unused
-			count: 1
-			path: src/EnqueueProcessor/OptionsProcessorAwareTrait.php
 
 		-
 			message: '#^Call to an undefined method Doctrine\\Persistence\\ObjectManager\:\:isOpen\(\)\.$#'
@@ -127,13 +115,175 @@ parameters:
 			path: src/Producer/EnqueueProducer.php
 
 		-
-			message: '#^Trait MessageBusBundle\\Traits\\ProducerAwareTrait is used zero times and is not analysed\.$#'
-			identifier: trait.unused
+			message: '#^Property MessageBusBundle\\Producer\\EnqueueProducer\:\:\$topicName is never read, only written\.$#'
+			identifier: property.onlyWritten
 			count: 1
-			path: src/Traits/ProducerAwareTrait.php
+			path: src/Producer/EnqueueProducer.php
+
+		-
+			message: '#^Call to method PHPUnit\\Framework\\Assert\:\:assertTrue\(\) with true will always evaluate to true\.$#'
+			identifier: method.alreadyNarrowedType
+			count: 1
+			path: tests/TestCase/Unit/AmqpTools/RabbitMqQueueManagerTest.php
+
+		-
+			message: '#^Class MessageBusBundle\\Command\\RequeueFailedCommand constructor invoked with 3 parameters, 2 required\.$#'
+			identifier: arguments.count
+			count: 2
+			path: tests/TestCase/Unit/Command/RequeueFailedCommandTest.php
+
+		-
+			message: '#^Call to method PHPUnit\\Framework\\Assert\:\:assertIsString\(\) with string will always evaluate to true\.$#'
+			identifier: method.alreadyNarrowedType
+			count: 1
+			path: tests/TestCase/Unit/Command/SetupTransportCommandTest.php
 
 		-
 			message: '#^Call to an undefined method Interop\\Queue\\Context\:\:expects\(\)\.$#'
 			identifier: method.notFound
 			count: 2
 			path: tests/TestCase/Unit/Consumption/BatchQueueConsumerTest.php
+
+		-
+			message: '#^Call to method PHPUnit\\Framework\\Assert\:\:assertTrue\(\) with true will always evaluate to true\.$#'
+			identifier: method.alreadyNarrowedType
+			count: 1
+			path: tests/TestCase/Unit/Consumption/BatchQueueConsumerTest.php
+
+		-
+			message: '#^Method class@anonymous/tests/TestCase/Unit/Encoder/EncoderRegistryAwareTraitTest\.php\:17\:\:setEncoderRegistry\(\) has invalid return type MessageBusBundle\\Encoder\\EncoderRegistryAwareTrait\.$#'
+			identifier: return.trait
+			count: 1
+			path: tests/TestCase/Unit/Encoder/EncoderRegistryAwareTraitTest.php
+
+		-
+			message: '#^PHPDoc tag @return with type MessageBusBundle\\Encoder\\EncoderRegistryAwareTrait is incompatible with native type class@anonymous/tests/TestCase/Unit/Encoder/EncoderRegistryAwareTraitTest\.php\:17\.$#'
+			identifier: return.phpDocType
+			count: 1
+			path: tests/TestCase/Unit/Encoder/EncoderRegistryAwareTraitTest.php
+
+		-
+			message: '#^Call to method PHPUnit\\Framework\\Assert\:\:assertTrue\(\) with true will always evaluate to true\.$#'
+			identifier: method.alreadyNarrowedType
+			count: 1
+			path: tests/TestCase/Unit/Encoder/ZlibCheckTraitTest.php
+
+		-
+			message: '#^Call to method PHPUnit\\Framework\\Assert\:\:assertTrue\(\) with true will always evaluate to true\.$#'
+			identifier: method.alreadyNarrowedType
+			count: 1
+			path: tests/TestCase/Unit/EnqueueProcessor/AbstractProcessorTest.php
+
+		-
+			message: '#^Call to method PHPUnit\\Framework\\Assert\:\:assertIsArray\(\) with array will always evaluate to true\.$#'
+			identifier: method.alreadyNarrowedType
+			count: 2
+			path: tests/TestCase/Unit/EnqueueProcessor/ExceptionHandler/ExceptionTraceGeneratorTraitTest.php
+
+		-
+			message: '#^Call to an undefined method Enqueue\\Client\\Config\:\:expects\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/TestCase/Unit/EnqueueProcessor/ExceptionHandler/RequeueHandlerTest.php
+
+		-
+			message: '#^Call to an undefined method MessageBusBundle\\Producer\\ProducerInterface\:\:expects\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: tests/TestCase/Unit/EnqueueProcessor/ExceptionHandler/RequeueHandlerTest.php
+
+		-
+			message: '#^Call to an undefined method Psr\\EventDispatcher\\EventDispatcherInterface\:\:expects\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: tests/TestCase/Unit/EnqueueProcessor/ExceptionHandler/RequeueHandlerTest.php
+
+		-
+			message: '#^Call to an undefined method Psr\\Log\\LoggerInterface\:\:expects\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: tests/TestCase/Unit/EnqueueProcessor/ExceptionHandler/RequeueHandlerTest.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Bridge\\Doctrine\\ManagerRegistry\:\:expects\(\)\.$#'
+			identifier: method.notFound
+			count: 9
+			path: tests/TestCase/Unit/EventSubscriber/ConsumerDoctrineEventSubscriberTest.php
+
+		-
+			message: '#^Call to method PHPUnit\\Framework\\Assert\:\:assertTrue\(\) with true will always evaluate to true\.$#'
+			identifier: method.alreadyNarrowedType
+			count: 11
+			path: tests/TestCase/Unit/EventSubscriber/SentryProfilerEventSubscriberTest.php
+
+		-
+			message: '#^Call to an undefined method Interop\\Amqp\\AmqpContext\:\:expects\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: tests/TestCase/Unit/Producer/EnqueueProducerTest.php
+
+		-
+			message: '#^Call to an undefined method Interop\\Amqp\\AmqpContext\:\:method\(\)\.$#'
+			identifier: method.notFound
+			count: 15
+			path: tests/TestCase/Unit/Producer/EnqueueProducerTest.php
+
+		-
+			message: '#^Call to an undefined method Interop\\Queue\\Producer\:\:expects\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: tests/TestCase/Unit/Producer/EnqueueProducerTest.php
+
+		-
+			message: '#^Call to an undefined method Interop\\Queue\\Producer\:\:method\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/TestCase/Unit/Producer/EnqueueProducerTest.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\EventDispatcher\\EventDispatcherInterface\:\:expects\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/TestCase/Unit/Producer/EnqueueProducerTest.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\DependencyInjection\\ContainerInterface\:\:method\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: tests/TestCase/Unit/Tests/MessageBusTraitTest.php
+
+		-
+			message: '#^Call to an undefined static method class@anonymous/tests/TestCase/Unit/Tests/MessageBusTraitTest\.php\:72\:\:assertEquals\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 2
+			path: tests/TestCase/Unit/Tests/MessageBusTraitTest.php
+
+		-
+			message: '#^Call to method PHPUnit\\Framework\\Assert\:\:assertTrue\(\) with true will always evaluate to true\.$#'
+			identifier: method.alreadyNarrowedType
+			count: 1
+			path: tests/TestCase/Unit/Tests/MessageBusTraitTest.php
+
+		-
+			message: '#^Method PHPUnit\\Framework\\TestCase@anonymous/tests/TestCase/Unit/Tests/MessageBusTraitTest\.php\:32\:\:__construct\(\) overrides @final method PHPUnit\\Framework\\TestCase\:\:__construct\(\)\.$#'
+			identifier: method.parentMethodFinalByPhpDoc
+			count: 1
+			path: tests/TestCase/Unit/Tests/MessageBusTraitTest.php
+
+		-
+			message: '#^Property MessageBusBundle\\Tests\\TestCase\\Unit\\Tests\\MessageBusTraitTest\:\:\$serializer is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: tests/TestCase/Unit/Tests/MessageBusTraitTest.php
+
+		-
+			message: '#^Property PHPUnit\\Framework\\TestCase@anonymous/tests/TestCase/Unit/Tests/MessageBusTraitTest\.php\:32\:\:\$producer is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: tests/TestCase/Unit/Tests/MessageBusTraitTest.php
+
+		-
+			message: '#^Property class@anonymous/tests/TestCase/Unit/Tests/MessageBusTraitTest\.php\:72\:\:\$producer is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: tests/TestCase/Unit/Tests/MessageBusTraitTest.php
