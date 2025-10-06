@@ -50,7 +50,10 @@ class BatchConsumeCommandTest extends ApiTestCase
 
         /** @var ProducerInterface $producer */
         $producer = self::getContainer()->get(ProducerInterface::class);
-        $producer->sendMessageToQueue(TestBatchProcessor::QUEUE, new AmqpMessage('Test message'));
+
+        foreach (range(0, 10) as $item) {
+            $producer->sendMessageToQueue(TestBatchProcessor::QUEUE, new AmqpMessage('Test message'));
+        }
 
         $result = $this->commandTester->execute([
             'processor' => 'test.batch.processor',

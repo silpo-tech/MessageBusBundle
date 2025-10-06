@@ -25,7 +25,6 @@
             <directory>./src/Exception/</directory>
             <directory>./src/Contracts/</directory>
             <directory>./src/Resources/</directory>
-            <directory>./src/Traits/</directory>
             <directory>./src/Events/</directory>
             <directory>./src/DependencyInjection/CompilerPass</directory>
         </exclude>
