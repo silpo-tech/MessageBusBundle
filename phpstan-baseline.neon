@@ -1,12 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Parameter \#2 \$code of class LogicException constructor expects int, null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Command/ConsumeCommand.php
-
-		-
 			message: '#^Call to an undefined method Interop\\Amqp\\AmqpContext\:\:getLibChannel\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -121,18 +115,6 @@ parameters:
 			path: src/Producer/EnqueueProducer.php
 
 		-
-			message: '#^Call to method PHPUnit\\Framework\\Assert\:\:assertTrue\(\) with true will always evaluate to true\.$#'
-			identifier: method.alreadyNarrowedType
-			count: 1
-			path: tests/TestCase/Unit/AmqpTools/RabbitMqQueueManagerTest.php
-
-		-
-			message: '#^Class MessageBusBundle\\Command\\RequeueFailedCommand constructor invoked with 3 parameters, 2 required\.$#'
-			identifier: arguments.count
-			count: 2
-			path: tests/TestCase/Unit/Command/RequeueFailedCommandTest.php
-
-		-
 			message: '#^Call to method PHPUnit\\Framework\\Assert\:\:assertIsString\(\) with string will always evaluate to true\.$#'
 			identifier: method.alreadyNarrowedType
 			count: 1
@@ -169,12 +151,6 @@ parameters:
 			path: tests/TestCase/Unit/Encoder/ZlibCheckTraitTest.php
 
 		-
-			message: '#^Call to method PHPUnit\\Framework\\Assert\:\:assertTrue\(\) with true will always evaluate to true\.$#'
-			identifier: method.alreadyNarrowedType
-			count: 1
-			path: tests/TestCase/Unit/EnqueueProcessor/AbstractProcessorTest.php
-
-		-
 			message: '#^Call to method PHPUnit\\Framework\\Assert\:\:assertIsArray\(\) with array will always evaluate to true\.$#'
 			identifier: method.alreadyNarrowedType
 			count: 2
@@ -203,18 +179,6 @@ parameters:
 			identifier: method.notFound
 			count: 2
 			path: tests/TestCase/Unit/EnqueueProcessor/ExceptionHandler/RequeueHandlerTest.php
-
-		-
-			message: '#^Call to an undefined method Symfony\\Bridge\\Doctrine\\ManagerRegistry\:\:expects\(\)\.$#'
-			identifier: method.notFound
-			count: 9
-			path: tests/TestCase/Unit/EventSubscriber/ConsumerDoctrineEventSubscriberTest.php
-
-		-
-			message: '#^Call to method PHPUnit\\Framework\\Assert\:\:assertTrue\(\) with true will always evaluate to true\.$#'
-			identifier: method.alreadyNarrowedType
-			count: 11
-			path: tests/TestCase/Unit/EventSubscriber/SentryProfilerEventSubscriberTest.php
 
 		-
 			message: '#^Call to an undefined method Interop\\Amqp\\AmqpContext\:\:expects\(\)\.$#'

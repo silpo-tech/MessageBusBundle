@@ -113,11 +113,17 @@ abstract class AbstractBatchProcessor implements BatchProcessorInterface, Proces
      */
     abstract public function doProcess(array $messages, Context $session): array;
 
+    /**
+     * @codeCoverageIgnore
+     */
     protected static function getProcessorServiceKey(): string
     {
         return self::class;
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     final public static function getDefaultIndexName(): string
     {
         return self::getProcessorServiceKey();

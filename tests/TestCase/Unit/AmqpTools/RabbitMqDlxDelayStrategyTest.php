@@ -5,133 +5,108 @@ declare(strict_types=1);
 namespace MessageBusBundle\Tests\TestCase\Unit\AmqpTools;
 
 use Interop\Amqp\AmqpContext;
+use Interop\Amqp\AmqpDestination;
 use Interop\Amqp\AmqpMessage;
 use Interop\Amqp\AmqpProducer;
 use Interop\Amqp\AmqpQueue;
-use Interop\Amqp\AmqpTopic;
+use Interop\Amqp\Impl\AmqpMessage as AmqpMessageImpl;
+use Interop\Amqp\Impl\AmqpQueue as AmqpQueueImpl;
+use Interop\Amqp\Impl\AmqpTopic as AmqpTopicImpl;
+use Interop\Queue\Exception\InvalidDestinationException;
 use MessageBusBundle\AmqpTools\RabbitMqDlxDelayStrategy;
-use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class RabbitMqDlxDelayStrategyTest extends TestCase
 {
-    private AmqpContext|MockObject $context;
-    private AmqpMessage|MockObject $message;
-    private AmqpProducer|MockObject $producer;
-    private RabbitMqDlxDelayStrategy $strategy;
+    #[DataProvider('delayMessageProvider')]
+    public function testDelayMessage(
+        AmqpDestination $destination,
+        array $messageProperties,
+        array $expectedProperties,
+        int $delay,
+        string $expectedQueueName
+    ): void {
+        $strategy = new RabbitMqDlxDelayStrategy();
+        $message = new AmqpMessageImpl('test body', $messageProperties, ['header' => 'value']);
+        $message->setRoutingKey('test.routing');
 
-    protected function setUp(): void
-    {
-        $this->context = $this->createMock(AmqpContext::class);
-        $this->message = $this->createMock(AmqpMessage::class);
-        $this->producer = $this->createMock(AmqpProducer::class);
-        $this->strategy = new RabbitMqDlxDelayStrategy();
-    }
+        $context = $this->createMock(AmqpContext::class);
+        $producer = $this->createMock(AmqpProducer::class);
 
-    public function testDelayMessageWithTopic(): void
-    {
-        $topic = $this->createMock(AmqpTopic::class);
-        $delayQueue = $this->createMock(AmqpQueue::class);
-        $delayMessage = $this->createMock(AmqpMessage::class);
+        $context->method('declareQueue');
+        $context->method('createProducer')->willReturn($producer);
+        $context->method('createMessage')->willReturnCallback(
+            fn ($body, $properties, $headers) => new AmqpMessageImpl($body, $properties, $headers)
+        );
+        $context->method('createQueue')->willReturnCallback(fn ($name) => new AmqpQueueImpl($name));
 
-        $topic->method('getTopicName')->willReturn('test.topic');
-
-        $this->message->method('getBody')->willReturn('test body');
-        $this->message->method('getProperties')->willReturn(['prop' => 'value']);
-        $this->message->method('getHeaders')->willReturn(['header' => 'value']);
-        $this->message->method('getRoutingKey')->willReturn('test.routing');
-
-        $this->context->expects($this->once())
-            ->method('createMessage')
-            ->with('test body', ['prop' => 'value'], ['header' => 'value'])
-            ->willReturn($delayMessage);
-
-        $this->context->expects($this->once())
-            ->method('createQueue')
-            ->with('test.routing.5000.x.delay')
-            ->willReturn($delayQueue);
-
-        $delayQueue->expects($this->once())
-            ->method('addFlag')
-            ->with(AmqpQueue::FLAG_DURABLE);
-
-        $this->context->expects($this->once())
-            ->method('declareQueue')
-            ->with($delayQueue);
-
-        $this->context->expects($this->once())
-            ->method('createProducer')
-            ->willReturn($this->producer);
-
-        $this->producer->expects($this->once())
+        $producer->expects($this->once())
             ->method('send')
-            ->with($delayQueue, $delayMessage);
+            ->with(
+                $this->callback(function (AmqpQueue $queue) use ($expectedQueueName) {
+                    $this->assertSame($expectedQueueName, $queue->getQueueName());
 
-        $this->strategy->delayMessage($this->context, $topic, $this->message, 5000);
+                    return true;
+                }),
+                $this->callback(function (AmqpMessage $message) use ($expectedProperties) {
+                    $this->assertSame('test body', $message->getBody());
+                    $this->assertEquals($expectedProperties, $message->getProperties());
+                    $this->assertEquals(['header' => 'value'], $message->getHeaders());
+                    $this->assertSame('test.routing', $message->getRoutingKey());
+
+                    return true;
+                })
+            );
+
+        $strategy->delayMessage($context, $destination, $message, $delay);
     }
 
-    public function testDelayMessageWithQueue(): void
+    public function testDelayMessageWithInvalidDestination(): void
     {
-        $queue = $this->createMock(AmqpQueue::class);
-        $delayQueue = $this->createMock(AmqpQueue::class);
-        $delayMessage = $this->createMock(AmqpMessage::class);
+        $strategy = new RabbitMqDlxDelayStrategy();
+        $message = new AmqpMessageImpl('test body');
+        $message->setRoutingKey('test.routing');
+        $context = $this->createMock(AmqpContext::class);
 
-        $queue->method('getQueueName')->willReturn('test.queue');
+        // Mock context to return a proper message with setRoutingKey method
+        $context->method('createMessage')->willReturnCallback(
+            fn ($body, $properties, $headers) => new AmqpMessageImpl($body, $properties, $headers)
+        );
 
-        $this->message->method('getBody')->willReturn('test body');
-        $this->message->method('getProperties')->willReturn([]);
-        $this->message->method('getHeaders')->willReturn([]);
-        $this->message->method('getRoutingKey')->willReturn('test.routing');
+        // Create an invalid destination (not AmqpTopic or AmqpQueue)
+        $invalidDestination = $this->createMock(AmqpDestination::class);
 
-        $this->context->expects($this->once())
-            ->method('createMessage')
-            ->willReturn($delayMessage);
+        $this->expectException(InvalidDestinationException::class);
+        $this->expectExceptionMessage('The destination must be an instance of');
 
-        $this->context->expects($this->once())
-            ->method('createQueue')
-            ->with('test.queue.3000.delayed')
-            ->willReturn($delayQueue);
-
-        $delayQueue->expects($this->once())
-            ->method('addFlag')
-            ->with(AmqpQueue::FLAG_DURABLE);
-
-        $this->context->expects($this->once())
-            ->method('declareQueue')
-            ->with($delayQueue);
-
-        $this->context->expects($this->once())
-            ->method('createProducer')
-            ->willReturn($this->producer);
-
-        $this->producer->expects($this->once())
-            ->method('send')
-            ->with($delayQueue, $delayMessage);
-
-        $this->strategy->delayMessage($this->context, $queue, $this->message, 3000);
+        $strategy->delayMessage($context, $invalidDestination, $message, 1000);
     }
 
-    public function testDelayMessageWithXDeathHeader(): void
+    public static function delayMessageProvider(): array
     {
-        $topic = $this->createMock(AmqpTopic::class);
-        $delayQueue = $this->createMock(AmqpQueue::class);
-        $delayMessage = $this->createMock(AmqpMessage::class);
-
-        $topic->method('getTopicName')->willReturn('test.topic');
-
-        $this->message->method('getBody')->willReturn('test body');
-        $this->message->method('getProperties')->willReturn(['x-death' => 'should be removed', 'other' => 'kept']);
-        $this->message->method('getHeaders')->willReturn([]);
-        $this->message->method('getRoutingKey')->willReturn('test.routing');
-
-        $this->context->expects($this->once())
-            ->method('createMessage')
-            ->with('test body', ['other' => 'kept'], [])
-            ->willReturn($delayMessage);
-
-        $this->context->method('createQueue')->willReturn($delayQueue);
-        $this->context->method('createProducer')->willReturn($this->producer);
-
-        $this->strategy->delayMessage($this->context, $topic, $this->message, 1000);
+        return [
+            'topic' => [
+                'destination' => new AmqpTopicImpl('test.topic'),
+                'messageProperties' => ['prop' => 'value'],
+                'expectedProperties' => ['prop' => 'value'],
+                'delay' => 5000,
+                'expectedQueueName' => 'test.routing.5000.x.delay',
+            ],
+            'queue' => [
+                'destination' => new AmqpQueueImpl('test.queue'),
+                'messageProperties' => ['prop' => 'value'],
+                'expectedProperties' => ['prop' => 'value'],
+                'delay' => 3000,
+                'expectedQueueName' => 'test.queue.3000.delayed',
+            ],
+            'x-death header removal' => [
+                'destination' => new AmqpTopicImpl('test.topic'),
+                'messageProperties' => ['x-death' => 'should be removed', 'other' => 'kept'],
+                'expectedProperties' => ['other' => 'kept'],
+                'delay' => 1000,
+                'expectedQueueName' => 'test.routing.1000.x.delay',
+            ],
+        ];
     }
 }

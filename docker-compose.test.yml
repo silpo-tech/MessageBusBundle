@@ -11,8 +11,9 @@ services:
       - .:/var/www/project
     env_file:
       - ./test.env
-    links:
-      - rabbit
+    depends_on:
+      rabbit:
+        condition: service_healthy
 
   ##
   rabbit:
@@ -25,3 +26,9 @@ services:
       - 15672:15672
     env_file:
       - ./test.env
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s

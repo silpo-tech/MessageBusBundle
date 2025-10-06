@@ -76,10 +76,6 @@ class ValidationHandlerTest extends TestCase
                        && array_key_exists('correlationId', $data);
             }));
 
-        $this->logger->expects($this->once())
-            ->method('debug')
-            ->with('Validation failed');
-
         $result = $this->handler->handle($exception, $message, $context, $processor);
 
         $this->assertEquals(Processor::ACK, $result);

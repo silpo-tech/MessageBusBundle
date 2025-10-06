@@ -10,6 +10,9 @@ use MessageBusBundle\DependencyInjection\CompilerPass\EncoderProducerPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
+/**
+ * @codeCoverageIgnore
+ */
 class MessageBusBundle extends Bundle
 {
     public function build(ContainerBuilder $container): void

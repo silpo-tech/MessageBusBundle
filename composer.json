@@ -55,10 +55,19 @@
       "@test:coverage"
     ],
     "test:coverage": {
-      "command": "APP_ENV=test php -d extension=pcov.so -d pcov.enabled=1 vendor/bin/phpunit --coverage-text --coverage-html ./reports/coverage --colors=never --coverage-cobertura=./reports/coverage/cobertura.xml --coverage-clover=./reports/coverage/clover.xml --log-junit=./reports/coverage/junit.xml"
+      "command": "APP_ENV=test php -d extension=pcov.so -d pcov.enabled=1 vendor/bin/phpunit --coverage-text --coverage-html ./reports/coverage --colors=never --coverage-cobertura=./reports/coverage/cobertura.xml --coverage-clover=./reports/coverage/clover.xml --log-junit=./reports/coverage/junit.xml --display-deprecations"
     },
     "test:run": [
-      "APP_ENV=test php vendor/bin/phpunit --color=always"
-    ]
+      "APP_ENV=test php vendor/bin/phpunit --color=always --display-deprecations"
+    ],
+    "test:integration": [
+      "APP_ENV=test php vendor/bin/phpunit --color=always --testsuite=Integration --display-deprecations"
+    ],
+    "test:unit": [
+      "APP_ENV=test php vendor/bin/phpunit --color=always --testsuite=Unit --display-deprecations"
+    ],
+    "lint": "vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --diff --dry-run",
+    "lint:fix": "vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php",
+    "phpstan": "php -d memory_limit=-1 vendor/bin/phpstan analyse -c phpstan.dist.neon"
   }
 }

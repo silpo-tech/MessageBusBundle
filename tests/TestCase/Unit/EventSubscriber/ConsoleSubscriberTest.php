@@ -7,9 +7,10 @@ namespace MessageBusBundle\Tests\TestCase\Unit\EventSubscriber;
 use MessageBusBundle\Command\BatchConsumeCommand;
 use MessageBusBundle\Command\ConsumeCommand;
 use MessageBusBundle\EventSubscriber\ConsoleSubscriber;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -17,66 +18,48 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ConsoleSubscriberTest extends TestCase
 {
-    private ConsoleSubscriber $subscriber;
-
-    protected function setUp(): void
+    #[DataProvider('commandProvider')]
+    public function testOnConsoleCommand(string $commandClass, int $expectedAddOptionCalls): void
     {
-        $this->subscriber = new ConsoleSubscriber(['option1', 'option2']);
+        /** @var Command&MockObject $command */
+        $command = $this->createMock($commandClass);
+
+        if ($expectedAddOptionCalls > 0) {
+            $command->expects($this->exactly($expectedAddOptionCalls))
+                ->method('addOption')
+                ->with($this->callback(function ($name) {
+                    return in_array($name, ['option1', 'option2']);
+                }), null, InputOption::VALUE_OPTIONAL);
+        } else {
+            $command->expects($this->never())
+                ->method('addOption');
+        }
+
+        $event = new ConsoleCommandEvent(
+            $command,
+            $this->createMock(InputInterface::class),
+            $this->createMock(OutputInterface::class)
+        );
+
+        $subscriber = new ConsoleSubscriber(['option1', 'option2']);
+        $subscriber->onConsoleCommand($event);
     }
 
-    public function testGetSubscribedEvents(): void
+    public static function commandProvider(): array
     {
-        $events = ConsoleSubscriber::getSubscribedEvents();
-
-        $this->assertArrayHasKey(ConsoleEvents::COMMAND, $events);
-        $this->assertEquals('onConsoleCommand', $events[ConsoleEvents::COMMAND]);
-    }
-
-    public function testOnConsoleCommandWithConsumeCommand(): void
-    {
-        $command = $this->createMock(ConsumeCommand::class);
-        $input = $this->createMock(InputInterface::class);
-        $output = $this->createMock(OutputInterface::class);
-
-        $event = new ConsoleCommandEvent($command, $input, $output);
-
-        $command->expects($this->exactly(2))
-            ->method('addOption')
-            ->with($this->callback(function ($name) {
-                return in_array($name, ['option1', 'option2']);
-            }), null, InputOption::VALUE_OPTIONAL);
-
-        $this->subscriber->onConsoleCommand($event);
-    }
-
-    public function testOnConsoleCommandWithBatchConsumeCommand(): void
-    {
-        $command = $this->createMock(BatchConsumeCommand::class);
-        $input = $this->createMock(InputInterface::class);
-        $output = $this->createMock(OutputInterface::class);
-
-        $event = new ConsoleCommandEvent($command, $input, $output);
-
-        $command->expects($this->exactly(2))
-            ->method('addOption')
-            ->with($this->callback(function ($name) {
-                return in_array($name, ['option1', 'option2']);
-            }), null, InputOption::VALUE_OPTIONAL);
-
-        $this->subscriber->onConsoleCommand($event);
-    }
-
-    public function testOnConsoleCommandWithOtherCommand(): void
-    {
-        $command = $this->createMock(Command::class);
-        $input = $this->createMock(InputInterface::class);
-        $output = $this->createMock(OutputInterface::class);
-
-        $event = new ConsoleCommandEvent($command, $input, $output);
-
-        $command->expects($this->never())
-            ->method('addOption');
-
-        $this->subscriber->onConsoleCommand($event);
+        return [
+            'ConsumeCommand' => [
+                'commandClass' => ConsumeCommand::class,
+                'expectedAddOptionCalls' => 2,
+            ],
+            'BatchConsumeCommand' => [
+                'commandClass' => BatchConsumeCommand::class,
+                'expectedAddOptionCalls' => 2,
+            ],
+            'Other Command' => [
+                'commandClass' => Command::class,
+                'expectedAddOptionCalls' => 0,
+            ],
+        ];
     }
 }

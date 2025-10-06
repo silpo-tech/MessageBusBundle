@@ -7,16 +7,20 @@ namespace MessageBusBundle\Tests\TestCase\Unit\DependencyInjection;
 use MessageBusBundle\DependencyInjection\Configuration;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\Definition\Processor;
 
-class ConfigurationTest extends TestCase
+final class ConfigurationTest extends TestCase
 {
-    private Configuration $configuration;
-    private Processor $processor;
+    private Configuration $configuration
+    ;
+    private Processor $processor
+    ;
 
     protected function setUp(): void
     {
         $this->configuration = new Configuration();
+
         $this->processor = new Processor();
     }
 
@@ -32,7 +36,7 @@ class ConfigurationTest extends TestCase
             'default_encoder' => null,
         ];
 
-        $this->assertEquals($expected, $config);
+        self::assertSame($expected, $config);
     }
 
     #[DataProvider('providerCustomConfigurations')]
@@ -41,17 +45,38 @@ class ConfigurationTest extends TestCase
         $config = $this->processor->processConfiguration($this->configuration, [$inputConfig]);
 
         foreach ($expectedConfig as $key => $value) {
-            $this->assertEquals($value, $config[$key]);
+            self::assertArrayHasKey($key, $config);
+
+            self::assertSame($value, $config[$key]);
         }
     }
 
     #[DataProvider('providerValidEncoders')]
     public function testValidEncoders(?string $encoder): void
     {
-        $configs = ['message_bus' => ['default_encoder' => $encoder]];
-        $config = $this->processor->processConfiguration($this->configuration, $configs);
+        $config = $this->processor->processConfiguration($this->configuration, [[
+            'default_encoder' => $encoder,
+        ]]);
 
-        $this->assertEquals($encoder, $config['default_encoder']);
+        self::assertSame($encoder, $config['default_encoder']);
+    }
+
+    public function testInvalidEncoder(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+
+        $this->processor->processConfiguration($this->configuration, [[
+            'default_encoder' => 'invalid_codec',
+        ]]);
+    }
+
+    public function testListenersPartialMerge(): void
+    {
+        $config = $this->processor->processConfiguration($this->configuration, [[
+            'listeners' => ['doctrine' => false],
+        ]]);
+
+        self::assertSame(['doctrine' => false], $config['listeners']);
     }
 
     public static function providerCustomConfigurations(): iterable

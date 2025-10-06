@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MessageBusBundle\Tests\Stub\Processor;
+namespace MessageBusBundle\Tests\Stub\Processor\ExceptionHandler;
 
 use Interop\Queue\Context;
 use Interop\Queue\Message;
@@ -17,7 +17,7 @@ class FinishExceptionHandler implements ExceptionHandlerInterface
         Context $context,
         ProcessorInterface $processor,
     ): ?string {
-        throw new \RuntimeException('TestBatchProcessor executed - stopping consumption');
+        throw $exception;
     }
 
     public function supports(\Throwable $exception): bool

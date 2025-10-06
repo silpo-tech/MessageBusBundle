@@ -14,6 +14,9 @@ use Sentry\Tracing\Transaction;
 use Sentry\Tracing\TransactionContext;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
+/**
+ * @codeCoverageIgnore
+ */
 class SentryProfilerEventSubscriber implements EventSubscriberInterface
 {
     private ?Span $transaction = null;

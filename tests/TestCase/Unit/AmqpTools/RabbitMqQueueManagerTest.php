@@ -11,88 +11,82 @@ use Interop\Amqp\Impl\AmqpBind;
 use Interop\Queue\Context;
 use MessageBusBundle\AmqpTools\RabbitMqQueueManager;
 use MessageBusBundle\MessageBus;
-use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class RabbitMqQueueManagerTest extends TestCase
 {
-    private AmqpContext|MockObject $context;
-    private RabbitMqQueueManager $manager;
-
-    protected function setUp(): void
+    #[DataProvider('initQueueProvider')]
+    public function testInitQueue(array $routingKeys, array $expectedExchanges, array $expectedRoutingKeys): void
     {
-        $this->context = $this->createMock(AmqpContext::class);
-        $this->manager = new RabbitMqQueueManager($this->context);
-    }
-
-    public function testInitQueueWithStringRoutingKeys(): void
-    {
+        $context = $this->createMock(AmqpContext::class);
         $queue = $this->createMock(AmqpQueue::class);
         $topic = $this->createMock(AmqpTopic::class);
+        $manager = new RabbitMqQueueManager($context);
 
-        $this->context->expects($this->once())
+        $context->expects($this->once())
             ->method('createQueue')
             ->with('test_queue')
             ->willReturn($queue);
 
-        $queue->expects($this->once())
-            ->method('setFlags')
-            ->with(AMQP_DURABLE);
-
-        $this->context->expects($this->once())
-            ->method('declareQueue')
-            ->with($queue);
-
-        $this->context->expects($this->once())
+        $topicCallIndex = 0;
+        $context
+            ->expects($this->exactly(count($expectedExchanges)))
             ->method('createTopic')
-            ->with(MessageBus::DEFAULT_EXCHANGE)
-            ->willReturn($topic);
+            ->willReturnCallback(function ($exchangeName) use ($expectedExchanges, $topic, &$topicCallIndex) {
+                $this->assertSame($expectedExchanges[$topicCallIndex], $exchangeName);
+                ++$topicCallIndex;
 
-        $topic->expects($this->once())
-            ->method('setFlags')
-            ->with(AMQP_DURABLE);
+                return $topic;
+            });
 
-        $this->context->expects($this->once())
-            ->method('declareTopic')
-            ->with($topic);
-
-        $this->context->expects($this->once())
+        $bindCallIndex = 0;
+        $context
+            ->expects($this->exactly(count($expectedRoutingKeys)))
             ->method('bind')
-            ->with($this->isInstanceOf(AmqpBind::class));
+            ->willReturnCallback(function (AmqpBind $bind) use ($expectedRoutingKeys, &$bindCallIndex) {
+                $this->assertSame($expectedRoutingKeys[$bindCallIndex], $bind->getRoutingKey());
+                ++$bindCallIndex;
+            });
 
-        $this->manager->initQueue('test_queue', ['test_routing_key']);
-    }
-
-    public function testInitQueueWithArrayRoutingKeys(): void
-    {
-        $queue = $this->createMock(AmqpQueue::class);
-        $topic = $this->createMock(AmqpTopic::class);
-
-        $this->context->expects($this->once())
-            ->method('createQueue')
-            ->with('test_queue')
-            ->willReturn($queue);
-
-        $this->context->expects($this->once())
-            ->method('createTopic')
-            ->with('custom_exchange')
-            ->willReturn($topic);
-
-        $routingKeys = [
-            ['routingKey' => 'test_key', 'exchange' => 'custom_exchange'],
-        ];
-
-        $this->manager->initQueue('test_queue', $routingKeys);
+        $manager->initQueue('test_queue', $routingKeys);
     }
 
     public function testInitQueueWithNonAmqpContext(): void
     {
         $context = $this->createMock(Context::class);
+        $context->expects($this->never())->method('createQueue');
+
         $manager = new RabbitMqQueueManager($context);
-
-        // Should not call any methods on non-AMQP context
         $manager->initQueue('test_queue', ['test_key']);
+    }
 
-        $this->assertTrue(true); // No exception thrown
+    public static function initQueueProvider(): array
+    {
+        return [
+            'string routing keys' => [
+                'routingKeys' => ['test_routing_key'],
+                'expectedExchanges' => [MessageBus::DEFAULT_EXCHANGE],
+                'expectedRoutingKeys' => ['test_routing_key'],
+            ],
+            'multiple string routing keys' => [
+                'routingKeys' => ['key1', 'key2', 'key3'],
+                'expectedExchanges' => [MessageBus::DEFAULT_EXCHANGE, MessageBus::DEFAULT_EXCHANGE, MessageBus::DEFAULT_EXCHANGE],
+                'expectedRoutingKeys' => ['key1', 'key2', 'key3'],
+            ],
+            'array routing keys' => [
+                'routingKeys' => [['routingKey' => 'test_key', 'exchange' => 'custom_exchange']],
+                'expectedExchanges' => ['custom_exchange'],
+                'expectedRoutingKeys' => ['test_key'],
+            ],
+            'mixed routing keys' => [
+                'routingKeys' => [
+                    'simple_key',
+                    ['routingKey' => 'complex_key', 'exchange' => 'custom_exchange'],
+                ],
+                'expectedExchanges' => [MessageBus::DEFAULT_EXCHANGE, 'custom_exchange'],
+                'expectedRoutingKeys' => ['simple_key', 'complex_key'],
+            ],
+        ];
     }
 }
