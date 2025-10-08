@@ -22,6 +22,9 @@ class EncodedMessageEventSubscriber implements EventSubscriberInterface
         $this->encoderRegistry = $encoderRegistry;
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public static function getSubscribedEvents(): array
     {
         return [

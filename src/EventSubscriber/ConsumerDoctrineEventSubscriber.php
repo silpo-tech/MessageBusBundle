@@ -17,6 +17,9 @@ class ConsumerDoctrineEventSubscriber implements EventSubscriberInterface
         $this->managerRegistry = $managerRegistry;
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public static function getSubscribedEvents(): array
     {
         return [

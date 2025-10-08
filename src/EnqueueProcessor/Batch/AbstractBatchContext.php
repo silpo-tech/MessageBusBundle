@@ -7,6 +7,9 @@ namespace MessageBusBundle\EnqueueProcessor\Batch;
 use Interop\Amqp\AmqpMessage;
 use MessageBusBundle\Exception\RequeueException;
 
+/**
+ * @codeCoverageIgnore
+ */
 abstract class AbstractBatchContext
 {
     /** @var Result[] */

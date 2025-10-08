@@ -8,9 +8,12 @@
 
 Run tests
 ```bash
-docker compose -p message-bus -f docker-compose.test.yml up -d --build --remove-orphans && \
-docker compose -p message-bus -f docker-compose.yml exec -T api /usr/local/bin/composer install --working-dir=/var/www/project -o --no-interaction --ignore-platform-reqs && \
-docker compose -p message-bus -f docker-compose.yml exec -T api /usr/local/bin/composer test:run --working-dir=/var/www/project
+make test # SKIP_INSTALL=true (if you have already installed dependencies)
+```
+
+To list all available commands
+```bash
+make help
 ```
 
 ## Installation ##

@@ -85,7 +85,7 @@ class ConsumeCommand extends Command
         try {
             $consumer = $this->getQueueConsumer($transport);
         } catch (NotFoundExceptionInterface $e) {
-            throw new \LogicException(sprintf('Transport "%s" is not supported.', $transport), null, $e);
+            throw new \LogicException(sprintf('Transport "%s" is not supported.', $transport), 0, $e);
         }
 
         /** @var AbstractProcessor $processor */

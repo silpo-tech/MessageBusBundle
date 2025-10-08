@@ -7,6 +7,7 @@ namespace MessageBusBundle\Tests\TestCase\Unit\Driver;
 use Enqueue\Client\Config;
 use Enqueue\Client\DriverInterface;
 use Enqueue\Client\RouteCollection;
+use Interop\Amqp\AmqpContext;
 use Interop\Queue\ConnectionFactory;
 use MessageBusBundle\Driver\AmqpDriver;
 use MessageBusBundle\Driver\DriverFactory;
@@ -30,7 +31,7 @@ class DriverFactoryTest extends TestCase
 
     public function testCreateAmqpDriver(): void
     {
-        $context = $this->createMock(\Interop\Amqp\AmqpContext::class);
+        $context = $this->createMock(AmqpContext::class);
 
         $this->config->expects($this->once())
             ->method('getTransportOption')

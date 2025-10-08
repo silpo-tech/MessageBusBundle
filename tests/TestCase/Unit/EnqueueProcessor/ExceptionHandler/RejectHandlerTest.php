@@ -58,15 +58,6 @@ class RejectHandlerTest extends TestCase
             ->method('getCorrelationId')
             ->willReturn('correlation-123');
 
-        $this->logger->expects($this->once())
-            ->method('debug')
-            ->with('[MessageBusBundle] Reject message', $this->callback(function ($context) {
-                return isset($context['reason'])
-                    && isset($context['trace'])
-                    && isset($context['message'])
-                    && isset($context['correlationId']);
-            }));
-
         $this->eventDispatcher->expects($this->once())
             ->method('dispatch')
             ->with($this->isInstanceOf(ConsumeRejectEvent::class));

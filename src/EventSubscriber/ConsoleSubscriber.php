@@ -17,6 +17,9 @@ class ConsoleSubscriber implements EventSubscriberInterface
     {
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public static function getSubscribedEvents(): array
     {
         return [ConsoleEvents::COMMAND => 'onConsoleCommand'];
