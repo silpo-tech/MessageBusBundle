@@ -8,6 +8,7 @@ use Interop\Queue\Context;
 use Interop\Queue\Message;
 use Interop\Queue\Processor;
 use MapperBundle\Mapper\MapperInterface;
+use MessageBusBundle\AmqpTools\QueueType;
 use MessageBusBundle\EnqueueProcessor\ExceptionHandler\ChainExceptionHandler;
 use MessageBusBundle\Events;
 use MessageBusBundle\Events\ConsumeEvent;
@@ -50,6 +51,11 @@ abstract class AbstractProcessor implements Processor, ProcessorInterface, Logge
         $this->eventDispatcher = $eventDispatcher;
 
         return $this;
+    }
+
+    public function getQueueType(): QueueType
+    {
+        return QueueType::DEFAULT;
     }
 
     public function process(Message $message, Context $context): string

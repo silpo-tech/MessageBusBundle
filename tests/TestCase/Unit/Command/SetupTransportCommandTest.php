@@ -178,6 +178,7 @@ class SetupTransportCommandTest extends TestCase
     {
         $processor = $this->createMock(ProcessorInterface::class);
         $processor->method('getSubscribedRoutingKeys')->willReturn($routingKeys);
+        $processor->method('getQueueType')->willReturn(\MessageBusBundle\AmqpTools\QueueType::DEFAULT);
 
         return $processor;
     }

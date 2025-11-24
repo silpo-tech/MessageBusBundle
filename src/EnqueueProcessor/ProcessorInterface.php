@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MessageBusBundle\EnqueueProcessor;
 
+use MessageBusBundle\AmqpTools\QueueType;
+
 interface ProcessorInterface
 {
     /**
@@ -18,4 +20,6 @@ interface ProcessorInterface
      * ]
      */
     public function getSubscribedRoutingKeys(): array;
+
+    public function getQueueType(): QueueType;
 }

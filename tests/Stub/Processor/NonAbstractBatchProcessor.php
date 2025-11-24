@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MessageBusBundle\Tests\Stub\Processor;
 
 use Interop\Queue\Context;
+use MessageBusBundle\AmqpTools\QueueType;
 use MessageBusBundle\EnqueueProcessor\Batch\BatchProcessorInterface;
 
 class NonAbstractBatchProcessor implements BatchProcessorInterface
@@ -21,5 +22,10 @@ class NonAbstractBatchProcessor implements BatchProcessorInterface
         return [
             self::QUEUE => ['test.non.abstract.batch.routing'],
         ];
+    }
+
+    public function getQueueType(): QueueType
+    {
+        return QueueType::DEFAULT;
     }
 }

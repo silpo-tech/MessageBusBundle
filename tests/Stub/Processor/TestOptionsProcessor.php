@@ -7,6 +7,7 @@ namespace MessageBusBundle\Tests\Stub\Processor;
 use Interop\Queue\Context;
 use Interop\Queue\Message;
 use Interop\Queue\Processor;
+use MessageBusBundle\AmqpTools\QueueType;
 use MessageBusBundle\EnqueueProcessor\OptionsProcessorInterface;
 use MessageBusBundle\EnqueueProcessor\ProcessorInterface;
 
@@ -29,6 +30,11 @@ class TestOptionsProcessor implements Processor, ProcessorInterface, OptionsProc
     public function getOptions(): array
     {
         return $this->options;
+    }
+
+    public function getQueueType(): QueueType
+    {
+        return QueueType::DEFAULT;
     }
 
     public function process(Message $message, Context $context): string

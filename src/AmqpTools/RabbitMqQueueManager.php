@@ -15,11 +15,18 @@ class RabbitMqQueueManager
     {
     }
 
-    public function initQueue(string $queueName, array $routingKeys): void
+    public function initQueue(string $queueName, array $routingKeys, QueueType $queueType = QueueType::DEFAULT): void
     {
         if ($this->context instanceof AmqpContext) {
             $queue = $this->context->createQueue($queueName);
-            $queue->setFlags(AMQP_DURABLE);
+            $queue->addFlag(AMQP_DURABLE);
+
+            if ($queueType === QueueType::QUORUM) {
+                $queue->setArguments([
+                    'x-queue-type' => 'quorum',
+                ]);
+            }
+
             $this->context->declareQueue($queue);
 
             foreach ($routingKeys as $routingKey) {

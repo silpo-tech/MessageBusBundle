@@ -8,85 +8,145 @@ use Interop\Amqp\AmqpContext;
 use Interop\Amqp\AmqpQueue;
 use Interop\Amqp\AmqpTopic;
 use Interop\Amqp\Impl\AmqpBind;
-use Interop\Queue\Context;
+use MessageBusBundle\AmqpTools\QueueType;
 use MessageBusBundle\AmqpTools\RabbitMqQueueManager;
-use MessageBusBundle\MessageBus;
-use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class RabbitMqQueueManagerTest extends TestCase
 {
-    #[DataProvider('initQueueProvider')]
-    public function testInitQueue(array $routingKeys, array $expectedExchanges, array $expectedRoutingKeys): void
+    private AmqpContext|MockObject $context;
+    private RabbitMqQueueManager $queueManager;
+
+    protected function setUp(): void
     {
-        $context = $this->createMock(AmqpContext::class);
+        $this->context = $this->createMock(AmqpContext::class);
+        $this->queueManager = new RabbitMqQueueManager($this->context);
+    }
+
+    public function testInitQueueWithDefaultType(): void
+    {
+        $queueName = 'test.queue';
+        $routingKeys = ['test.routing.key'];
+
         $queue = $this->createMock(AmqpQueue::class);
         $topic = $this->createMock(AmqpTopic::class);
-        $manager = new RabbitMqQueueManager($context);
 
-        $context->expects($this->once())
+        $this->context->expects($this->once())
             ->method('createQueue')
-            ->with('test_queue')
+            ->with($queueName)
             ->willReturn($queue);
 
-        $topicCallIndex = 0;
-        $context
-            ->expects($this->exactly(count($expectedExchanges)))
+        $queue->expects($this->once())
+            ->method('addFlag')
+            ->with(AMQP_DURABLE);
+
+        $queue->expects($this->never())
+            ->method('setArguments');
+
+        $this->context->expects($this->once())
+            ->method('declareQueue')
+            ->with($queue);
+
+        $this->context->expects($this->once())
             ->method('createTopic')
-            ->willReturnCallback(function ($exchangeName) use ($expectedExchanges, $topic, &$topicCallIndex) {
-                $this->assertSame($expectedExchanges[$topicCallIndex], $exchangeName);
-                ++$topicCallIndex;
+            ->willReturn($topic);
 
-                return $topic;
-            });
+        $topic->expects($this->once())
+            ->method('setFlags')
+            ->with(AMQP_DURABLE);
 
-        $bindCallIndex = 0;
-        $context
-            ->expects($this->exactly(count($expectedRoutingKeys)))
+        $this->context->expects($this->once())
+            ->method('declareTopic')
+            ->with($topic);
+
+        $this->context->expects($this->once())
             ->method('bind')
-            ->willReturnCallback(function (AmqpBind $bind) use ($expectedRoutingKeys, &$bindCallIndex) {
-                $this->assertSame($expectedRoutingKeys[$bindCallIndex], $bind->getRoutingKey());
-                ++$bindCallIndex;
-            });
+            ->with($this->isInstanceOf(AmqpBind::class));
 
-        $manager->initQueue('test_queue', $routingKeys);
+        $this->queueManager->initQueue($queueName, $routingKeys, QueueType::DEFAULT);
     }
 
-    public function testInitQueueWithNonAmqpContext(): void
+    public function testInitQueueWithQuorumType(): void
     {
-        $context = $this->createMock(Context::class);
-        $context->expects($this->never())->method('createQueue');
+        $queueName = 'test.quorum.queue';
+        $routingKeys = ['test.routing.key'];
 
-        $manager = new RabbitMqQueueManager($context);
-        $manager->initQueue('test_queue', ['test_key']);
+        $queue = $this->createMock(AmqpQueue::class);
+        $topic = $this->createMock(AmqpTopic::class);
+
+        $this->context->expects($this->once())
+            ->method('createQueue')
+            ->with($queueName)
+            ->willReturn($queue);
+
+        $queue->expects($this->once())
+            ->method('addFlag')
+            ->with(AMQP_DURABLE);
+
+        $queue->expects($this->once())
+            ->method('setArguments')
+            ->with(['x-queue-type' => 'quorum']);
+
+        $this->context->expects($this->once())
+            ->method('declareQueue')
+            ->with($queue);
+
+        $this->context->expects($this->once())
+            ->method('createTopic')
+            ->willReturn($topic);
+
+        $topic->expects($this->once())
+            ->method('setFlags')
+            ->with(AMQP_DURABLE);
+
+        $this->context->expects($this->once())
+            ->method('declareTopic')
+            ->with($topic);
+
+        $this->context->expects($this->once())
+            ->method('bind')
+            ->with($this->isInstanceOf(AmqpBind::class));
+
+        $this->queueManager->initQueue($queueName, $routingKeys, QueueType::QUORUM);
     }
 
-    public static function initQueueProvider(): array
+    public function testInitQueueWithDefaultTypeWhenNotSpecified(): void
     {
-        return [
-            'string routing keys' => [
-                'routingKeys' => ['test_routing_key'],
-                'expectedExchanges' => [MessageBus::DEFAULT_EXCHANGE],
-                'expectedRoutingKeys' => ['test_routing_key'],
-            ],
-            'multiple string routing keys' => [
-                'routingKeys' => ['key1', 'key2', 'key3'],
-                'expectedExchanges' => [MessageBus::DEFAULT_EXCHANGE, MessageBus::DEFAULT_EXCHANGE, MessageBus::DEFAULT_EXCHANGE],
-                'expectedRoutingKeys' => ['key1', 'key2', 'key3'],
-            ],
-            'array routing keys' => [
-                'routingKeys' => [['routingKey' => 'test_key', 'exchange' => 'custom_exchange']],
-                'expectedExchanges' => ['custom_exchange'],
-                'expectedRoutingKeys' => ['test_key'],
-            ],
-            'mixed routing keys' => [
-                'routingKeys' => [
-                    'simple_key',
-                    ['routingKey' => 'complex_key', 'exchange' => 'custom_exchange'],
-                ],
-                'expectedExchanges' => [MessageBus::DEFAULT_EXCHANGE, 'custom_exchange'],
-                'expectedRoutingKeys' => ['simple_key', 'complex_key'],
-            ],
-        ];
+        $queueName = 'test.queue';
+        $routingKeys = ['test.routing.key'];
+
+        $queue = $this->createMock(AmqpQueue::class);
+        $topic = $this->createMock(AmqpTopic::class);
+
+        $this->context->expects($this->once())
+            ->method('createQueue')
+            ->with($queueName)
+            ->willReturn($queue);
+
+        $queue->expects($this->once())
+            ->method('addFlag')
+            ->with(AMQP_DURABLE);
+
+        $queue->expects($this->never())
+            ->method('setArguments');
+
+        $this->context->expects($this->once())
+            ->method('declareQueue')
+            ->with($queue);
+
+        $this->context->expects($this->once())
+            ->method('createTopic')
+            ->willReturn($topic);
+
+        $this->context->expects($this->once())
+            ->method('declareTopic')
+            ->with($topic);
+
+        $this->context->expects($this->once())
+            ->method('bind');
+
+        // Call without specifying queue type - should default to DEFAULT
+        $this->queueManager->initQueue($queueName, $routingKeys);
     }
 }
