@@ -7,6 +7,7 @@ namespace MessageBusBundle\Tests\TestCase\Unit\Command;
 use MessageBusBundle\AmqpTools\RabbitMqQueueManager;
 use MessageBusBundle\Command\SetupTransportCommand;
 use MessageBusBundle\EnqueueProcessor\ProcessorInterface;
+use MessageBusBundle\AmqpTools\QueueType;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -178,7 +179,7 @@ class SetupTransportCommandTest extends TestCase
     {
         $processor = $this->createMock(ProcessorInterface::class);
         $processor->method('getSubscribedRoutingKeys')->willReturn($routingKeys);
-        $processor->method('getQueueType')->willReturn(\MessageBusBundle\AmqpTools\QueueType::DEFAULT);
+        $processor->method('getQueueType')->willReturn(QueueType::DEFAULT);
 
         return $processor;
     }
