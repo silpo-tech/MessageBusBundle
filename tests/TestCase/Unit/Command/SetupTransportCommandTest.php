@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace MessageBusBundle\Tests\TestCase\Unit\Command;
 
+use MessageBusBundle\AmqpTools\QueueType;
 use MessageBusBundle\AmqpTools\RabbitMqQueueManager;
 use MessageBusBundle\Command\SetupTransportCommand;
 use MessageBusBundle\EnqueueProcessor\ProcessorInterface;
-use MessageBusBundle\AmqpTools\QueueType;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
