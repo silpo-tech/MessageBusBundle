@@ -38,7 +38,7 @@ class RabbitMqQueueManagerTest extends TestCase
             ->willReturn($queue);
 
         $queue->expects($this->once())
-            ->method('addFlag')
+            ->method('setFlags')
             ->with(AMQP_DURABLE);
 
         $queue->expects($this->never())
@@ -81,7 +81,7 @@ class RabbitMqQueueManagerTest extends TestCase
             ->willReturn($queue);
 
         $queue->expects($this->once())
-            ->method('addFlag')
+            ->method('setFlags')
             ->with(AMQP_DURABLE);
 
         $queue->expects($this->once())
@@ -125,7 +125,7 @@ class RabbitMqQueueManagerTest extends TestCase
             ->willReturn($queue);
 
         $queue->expects($this->once())
-            ->method('addFlag')
+            ->method('setFlags')
             ->with(AMQP_DURABLE);
 
         $queue->expects($this->never())

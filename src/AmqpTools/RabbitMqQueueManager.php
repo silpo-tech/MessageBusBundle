@@ -19,7 +19,7 @@ class RabbitMqQueueManager
     {
         if ($this->context instanceof AmqpContext) {
             $queue = $this->context->createQueue($queueName);
-            $queue->addFlag(AMQP_DURABLE);
+            $queue->setFlags(AMQP_DURABLE);
 
             if ($queueType === QueueType::QUORUM) {
                 $queue->setArguments([
