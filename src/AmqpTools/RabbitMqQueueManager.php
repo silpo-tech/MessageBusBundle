@@ -21,7 +21,7 @@ class RabbitMqQueueManager
             $queue = $this->context->createQueue($queueName);
             $queue->setFlags(AMQP_DURABLE);
 
-            if ($queueType === QueueType::QUORUM) {
+            if (QueueType::QUORUM === $queueType) {
                 $queue->setArguments([
                     'x-queue-type' => 'quorum',
                 ]);

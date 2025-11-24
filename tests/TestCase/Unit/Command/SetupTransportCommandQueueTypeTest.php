@@ -96,10 +96,10 @@ class SetupTransportCommandQueueTypeTest extends TestCase
         $this->queueManager->expects($this->exactly(2))
             ->method('initQueue')
             ->willReturnCallback(function ($queue, $routingKeys, $queueType) {
-                if ($queue === 'default.queue') {
+                if ('default.queue' === $queue) {
                     $this->assertEquals(QueueType::DEFAULT, $queueType);
                     $this->assertEquals(['default.routing'], $routingKeys);
-                } elseif ($queue === 'quorum.queue') {
+                } elseif ('quorum.queue' === $queue) {
                     $this->assertEquals(QueueType::QUORUM, $queueType);
                     $this->assertEquals(['quorum.routing'], $routingKeys);
                 }
