@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MessageBusBundle\Enqueue;
 
 use MessageBusBundle\EnqueueProcessor\Batch\BatchProcessorInterface;

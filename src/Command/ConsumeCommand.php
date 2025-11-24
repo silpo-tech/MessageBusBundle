@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MessageBusBundle\Command;
 
 use Enqueue\Consumption\ChainExtension;
