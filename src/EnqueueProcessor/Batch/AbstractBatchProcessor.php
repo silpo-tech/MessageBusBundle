@@ -8,6 +8,7 @@ use Enqueue\Consumption\Result as EnqueueResult;
 use Interop\Amqp\AmqpMessage;
 use Interop\Queue\Context;
 use Interop\Queue\Message as InteropMessage;
+use MessageBusBundle\AmqpTools\QueueType;
 use MessageBusBundle\EnqueueProcessor\ExceptionHandler\ChainExceptionHandler;
 use MessageBusBundle\EnqueueProcessor\ProcessorInterface;
 use MessageBusBundle\Events;
@@ -40,6 +41,11 @@ abstract class AbstractBatchProcessor implements BatchProcessorInterface, Proces
         $this->chainExceptionHandler = $chainExceptionHandler;
 
         return $this;
+    }
+
+    public function getQueueType(): QueueType
+    {
+        return QueueType::DEFAULT;
     }
 
     /**

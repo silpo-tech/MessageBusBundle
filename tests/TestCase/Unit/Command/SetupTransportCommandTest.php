@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MessageBusBundle\Tests\TestCase\Unit\Command;
 
+use MessageBusBundle\AmqpTools\QueueType;
 use MessageBusBundle\AmqpTools\RabbitMqQueueManager;
 use MessageBusBundle\Command\SetupTransportCommand;
 use MessageBusBundle\EnqueueProcessor\ProcessorInterface;
@@ -178,6 +179,7 @@ class SetupTransportCommandTest extends TestCase
     {
         $processor = $this->createMock(ProcessorInterface::class);
         $processor->method('getSubscribedRoutingKeys')->willReturn($routingKeys);
+        $processor->method('getQueueType')->willReturn(QueueType::DEFAULT);
 
         return $processor;
     }

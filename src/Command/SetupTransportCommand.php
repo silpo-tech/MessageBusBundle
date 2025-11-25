@@ -34,8 +34,9 @@ class SetupTransportCommand extends Command
         foreach ($this->processors as $processor) {
             if ($processor instanceof ProcessorInterface) {
                 $routings = $processor->getSubscribedRoutingKeys();
+                $queueType = $processor->getQueueType();
                 foreach ($routings as $queueName => $routingKeys) {
-                    $this->rmqQueueManager->initQueue($queueName, $routingKeys);
+                    $this->rmqQueueManager->initQueue($queueName, $routingKeys, $queueType);
                 }
             }
         }

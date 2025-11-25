@@ -38,6 +38,7 @@ install: up ## Install composer dependencies (use SKIP_INSTALL=true to skip in r
 ##@ Tests:
 
 test: install ## Run tests
+	@$(COMPOSE_COMMAND) exec -T api rm -rf /var/www/project/var/cache/* || true
 	$(COMPOSE_COMMAND) exec -T api /usr/local/bin/composer test:run --working-dir=/var/www/project
 
 integration: install ## Run integration tests

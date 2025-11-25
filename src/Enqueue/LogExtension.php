@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MessageBusBundle\Enqueue;
 
 use Enqueue\Consumption\Context\MessageReceived;
@@ -51,7 +53,7 @@ class LogExtension implements MessageReceivedExtensionInterface, PostMessageRece
             $logMessage .= ' {reason}';
         }
         $logContext = [
-            'result' => str_replace('enqueue.', '', $result),
+            'result' => str_replace('enqueue.', '', (string) $result),
             'reason' => $reason,
             'queueName' => $queue->getQueueName(),
             'body' => Stringify::that($message->getBody()),

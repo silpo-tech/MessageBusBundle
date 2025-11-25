@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MessageBusBundle\Tests\TestCase\Unit\Consumption;
 
 use Enqueue\Consumption\Exception\LogicException;

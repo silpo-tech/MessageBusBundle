@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MessageBusBundle\EnqueueProcessor\Batch;
 
 use Enqueue\Consumption\Result as EnqueueResult;
