@@ -55,7 +55,7 @@ class BatchConsumeCommand extends Command
             $processor->setOptions($input->getOptions());
         }
 
-        if (!($processor instanceof AbstractBatchProcessor)) {
+        if (!$processor instanceof AbstractBatchProcessor) {
             throw new NonBatchProcessorException(sprintf('%s processor is not support batch consume', $input->getArgument('processor')));
         }
 

@@ -32,7 +32,7 @@ install: up ## Install composer dependencies (use SKIP_INSTALL=true to skip in r
 	if [ '$(SKIP_INSTALL)' = 'true' ] || [ '$(SKIP_INSTALL)' = '1' ]; then \
 		echo 'Composer installation has been skipped'; \
 	else \
-		$(COMPOSE_COMMAND) exec -T api /usr/local/bin/composer install --working-dir=/var/www/project -o --no-interaction --ignore-platform-reqs; \
+		$(COMPOSE_COMMAND) exec -T api /usr/local/bin/composer install --working-dir=/var/www/project -o --no-interaction --ignore-platform-req=ext-sockets; \
 	fi
 
 ##@ Tests:

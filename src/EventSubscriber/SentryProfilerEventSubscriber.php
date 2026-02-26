@@ -8,7 +8,6 @@ use MessageBusBundle\Events;
 use MessageBusBundle\Events\BatchConsumeEvent;
 use MessageBusBundle\Events\PreConsumeEvent;
 use Sentry\SentrySdk;
-use Sentry\Tracing\Span;
 use Sentry\Tracing\SpanStatus;
 use Sentry\Tracing\Transaction;
 use Sentry\Tracing\TransactionContext;
@@ -19,78 +18,78 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 class SentryProfilerEventSubscriber implements EventSubscriberInterface
 {
-    private ?Span $transaction = null;
+    private ?Transaction $transaction = null;
+
+    public static function getSubscribedEvents(): array
+    {
+        return [
+            Events::BATCH_CONSUME__START => ['startTransaction', 1000],
+            Events::BATCH_CONSUME__FINISHED => ['successTransaction', -1000],
+            Events::BATCH_CONSUME__EXCEPTION => ['errorTransaction', -1000],
+            Events::CONSUME__PRE_START => ['startAnonymousTransaction', 1000],
+            Events::CONSUME__FINISHED => ['successTransaction', -1000],
+            Events::CONSUME__EXCEPTION => ['errorTransaction', -1000],
+        ];
+    }
 
     public function startTransaction(BatchConsumeEvent $batchConsumeEvent): void
     {
-        if (null === $this->transaction && class_exists(TransactionContext::class)) {
-            $sentryTransactionContext = new TransactionContext();
-            $sentryTransactionContext->setName('MBus '.$batchConsumeEvent->getProcessorClass());
-            $sentryTransactionContext->setOp('processor.batchProcess');
-            $sentryTransactionContext->setTags([
-                'sf.messages' => count($batchConsumeEvent->getMessagesBatch()),
+        if ($this->sentryTransactionSupports() && null === $this->transaction) {
+            SentrySdk::getCurrentHub()->pushScope();
+
+            $context = new TransactionContext();
+            $context->setName('MBus '.$batchConsumeEvent->getProcessorClass());
+            $context->setOp('processor.batchProcess');
+            $context->setTags([
+                'sf.messages' => (string) count($batchConsumeEvent->getMessagesBatch()),
             ]);
 
-            $sentryTransaction = SentrySdk::getCurrentHub()->startTransaction($sentryTransactionContext);
-            SentrySdk::getCurrentHub()->setSpan($sentryTransaction);
+            $this->transaction = SentrySdk::getCurrentHub()->startTransaction($context);
 
-            $this->transaction = $sentryTransaction;
+            SentrySdk::getCurrentHub()->setSpan($this->transaction);
         }
     }
 
     public function startAnonymousTransaction(PreConsumeEvent $event): void
     {
-        if (null === $this->transaction && class_exists(TransactionContext::class)) {
-            $sentryTransactionContext = new TransactionContext();
-            $sentryTransactionContext->setName('MBus '.$event->getProcessorClass());
-            $sentryTransactionContext->setOp('processor.process');
+        if ($this->sentryTransactionSupports() && null === $this->transaction) {
+            SentrySdk::getCurrentHub()->pushScope();
 
-            $sentryTransaction = SentrySdk::getCurrentHub()->startTransaction($sentryTransactionContext);
-            SentrySdk::getCurrentHub()->setSpan($sentryTransaction);
+            $context = new TransactionContext();
+            $context->setName('MBus '.$event->getProcessorClass());
+            $context->setOp('processor.process');
 
-            $this->transaction = $sentryTransaction;
+            $this->transaction = SentrySdk::getCurrentHub()->startTransaction($context);
+
+            SentrySdk::getCurrentHub()->setSpan($this->transaction);
         }
     }
 
     public function successTransaction(): void
     {
-        if ($this->transaction instanceof Transaction && class_exists(TransactionContext::class)) {
+        if ($this->sentryTransactionSupports() && null !== $this->transaction) {
             $this->transaction->setStatus(SpanStatus::ok());
+            $this->finishTransaction();
         }
-
-        $this->finishTransaction();
     }
 
     public function errorTransaction(): void
     {
-        if (!class_exists(TransactionContext::class)) {
-            return;
-        }
-
-        if ($this->transaction instanceof Transaction) {
+        if ($this->sentryTransactionSupports() && null !== $this->transaction) {
             $this->transaction->setStatus(SpanStatus::unknownError());
+            $this->finishTransaction();
         }
+    }
 
-        $this->finishTransaction();
+    private function sentryTransactionSupports(): bool
+    {
+        return class_exists(TransactionContext::class);
     }
 
     private function finishTransaction(): void
     {
-        if ($this->transaction instanceof Transaction && class_exists(TransactionContext::class)) {
-            $this->transaction->finish();
-            $this->transaction = null;
-        }
-    }
-
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            Events::BATCH_CONSUME__START => 'startTransaction',
-            Events::BATCH_CONSUME__FINISHED => 'successTransaction',
-            Events::BATCH_CONSUME__EXCEPTION => 'errorTransaction',
-            Events::CONSUME__PRE_START => 'startAnonymousTransaction',
-            Events::CONSUME__FINISHED => 'successTransaction',
-            Events::CONSUME__EXCEPTION => 'errorTransaction',
-        ];
+        $this->transaction->finish();
+        $this->transaction = null;
+        SentrySdk::getCurrentHub()->popScope();
     }
 }

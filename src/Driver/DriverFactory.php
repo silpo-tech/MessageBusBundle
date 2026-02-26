@@ -17,8 +17,8 @@ class DriverFactory implements DriverFactoryInterface
     {
         if (0 === strpos($config->getTransportOption('dsn'), 'amqp')) {
             return new AmqpDriver($factory->createContext(), $config, $collection);
-        } else {
-            return (new BaseDriverFactory())->create($factory, $config, $collection);
         }
+
+        return (new BaseDriverFactory())->create($factory, $config, $collection);
     }
 }
