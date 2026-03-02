@@ -19,12 +19,6 @@ parameters:
 			path: src/Consumption/BatchQueueConsumer.php
 
 		-
-			message: '#^Call to an undefined method Symfony\\Component\\Config\\Definition\\Builder\\NodeDefinition\:\:children\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/DependencyInjection/Configuration.php
-
-		-
 			message: '#^Call to an undefined method Interop\\Queue\\Context\:\:bind\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -71,12 +65,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: src/EventSubscriber/ConsumerDoctrineEventSubscriber.php
-
-		-
-			message: '#^Parameter \#1 \$tags of method Sentry\\Tracing\\SpanContext\:\:setTags\(\) expects array\<string, string\>, array\<string, int\<0, max\>\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/EventSubscriber/SentryProfilerEventSubscriber.php
 
 		-
 			message: '#^Call to an undefined method Interop\\Queue\\Context\:\:declareQueue\(\)\.$#'
