@@ -61,7 +61,7 @@ class BatchConsumeCommand extends Command
 
         if ($input->getOption('initQueue')) {
             foreach ($processor->getSubscribedRoutingKeys() as $queueName => $routingKeys) {
-                $this->rmqQueueManager->initQueue($queueName, $routingKeys);
+                $this->rmqQueueManager->initQueue($queueName, $routingKeys, $processor->getQueueType());
             }
         }
 
