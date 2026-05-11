@@ -8,6 +8,7 @@ use Enqueue\Client\Config;
 use Interop\Queue\Context;
 use Interop\Queue\Message;
 use Interop\Queue\Processor;
+use MessageBusBundle\AmqpTools\QueueType;
 use MessageBusBundle\EnqueueProcessor\ExceptionHandler\RequeueHandler;
 use MessageBusBundle\EnqueueProcessor\ProcessorInterface;
 use MessageBusBundle\Events\ConsumeRequeueEvent;
@@ -51,8 +52,11 @@ class RequeueHandlerTest extends TestCase
         $message->expects($this->once())->method('getProperty')->with('requeue-count', 0)->willReturn(1);
         $message->expects($this->exactly(2))->method('setProperty');
         $processor->expects($this->once())->method('getSubscribedRoutingKeys')->willReturn(['test.queue' => []]);
+        $processor->expects($this->once())->method('getQueueType')->willReturn(QueueType::DEFAULT);
 
-        $this->producer->expects($this->once())->method('sendMessageToQueue')->with('test.queue', $message, 4000);
+        $this->producer->expects($this->once())
+            ->method('sendMessageToQueue')
+            ->with('test.queue', $message, 4000, QueueType::DEFAULT);
         $this->eventDispatcher->expects($this->once())->method('dispatch')->with($this->isInstanceOf(ConsumeRequeueEvent::class));
         $this->logger->expects($this->once())->method('debug');
 
@@ -70,9 +74,12 @@ class RequeueHandlerTest extends TestCase
 
         $message->expects($this->once())->method('getProperty')->with('requeue-count', 0)->willReturn(2);
         $processor->expects($this->once())->method('getSubscribedRoutingKeys')->willReturn(['test.queue' => []]);
+        $processor->expects($this->once())->method('getQueueType')->willReturn(QueueType::QUORUM);
         $this->config->expects($this->once())->method('getSeparator')->willReturn('.');
 
-        $this->producer->expects($this->once())->method('sendMessageToQueue')->with('test.queue.failed', $message);
+        $this->producer->expects($this->once())
+            ->method('sendMessageToQueue')
+            ->with('test.queue.failed', $message, 0, QueueType::QUORUM);
         $this->eventDispatcher->expects($this->once())->method('dispatch')->with($this->isInstanceOf(ConsumeRequeueExceedEvent::class));
         $this->logger->expects($this->once())->method('error');
 

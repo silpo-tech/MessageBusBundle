@@ -15,6 +15,7 @@ use Interop\Queue\Producer;
 use MessageBusBundle\Events;
 use MessageBusBundle\Events\PrePublishEvent;
 use MessageBusBundle\MessageBus;
+use MessageBusBundle\AmqpTools\QueueType;
 use MessageBusBundle\Producer\EnqueueProducer;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -161,6 +162,37 @@ class EnqueueProducerTest extends TestCase
 
         $enqueueProducer = new EnqueueProducer($this->config, $this->factory, $this->eventDispatcher);
         $result = $enqueueProducer->sendMessageToQueue('test.queue', $message);
+
+        $this->assertSame($enqueueProducer, $result);
+    }
+
+    public function testSendMessageToQueueSetsQueueType(): void
+    {
+        $message = $this->createMock(AmqpMessage::class);
+        $queue = $this->createMock(AmqpQueue::class);
+
+        $this->context->method('createQueue')->willReturn($queue);
+
+        $queue->expects($this->once())->method('setArgument')->with('x-queue-type', 'quorum');
+
+        $enqueueProducer = new EnqueueProducer($this->config, $this->factory, $this->eventDispatcher);
+        $result = $enqueueProducer->sendMessageToQueue('test.queue', $message, 0, QueueType::QUORUM);
+
+        $this->assertSame($enqueueProducer, $result);
+    }
+
+    public function testSendMessageToExistingQueue(): void
+    {
+        $message = $this->createMock(AmqpMessage::class);
+        $queue = $this->createMock(AmqpQueue::class);
+        $logger = $this->createMock(LoggerInterface::class);
+
+        $this->context->expects($this->never())->method('createQueue');
+        $this->producer->expects($this->once())->method('send')->with($queue, $message);
+
+        $enqueueProducer = new EnqueueProducer($this->config, $this->factory, $this->eventDispatcher);
+        $enqueueProducer->setLogger($logger);
+        $result = $enqueueProducer->sendMessageToExistingQueue($queue, $message);
 
         $this->assertSame($enqueueProducer, $result);
     }

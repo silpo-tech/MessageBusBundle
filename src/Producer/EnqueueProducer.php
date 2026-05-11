@@ -11,6 +11,8 @@ use Interop\Queue\Context;
 use Interop\Queue\Destination;
 use Interop\Queue\Message;
 use Interop\Queue\Producer;
+use Interop\Queue\Queue;
+use MessageBusBundle\AmqpTools\QueueType;
 use MessageBusBundle\AmqpTools\RabbitMqDlxDelayStrategy;
 use MessageBusBundle\Events;
 use MessageBusBundle\Events\PrePublishEvent;
@@ -92,15 +94,23 @@ class EnqueueProducer implements ProducerInterface, LoggerAwareInterface
      *
      * @return $this
      */
-    public function sendMessageToQueue(string $queue, Message $message, int $delay = 0): self
+    public function sendMessageToQueue(string $queue, Message $message, int $delay = 0, QueueType $queueType = QueueType::DEFAULT): self
     {
         // create destination eueue
         $destination = $this->context->createQueue($queue);
         if ($destination instanceof AmqpQueue) {
             $destination->addFlag(AmqpQueue::FLAG_DURABLE);
+            if ($queueType !== QueueType::DEFAULT) {
+                $destination->setArgument('x-queue-type', $queueType->value);
+            }
         }
 
         return $this->doSend($destination, $message, $delay);
+    }
+
+    public function sendMessageToExistingQueue(Queue $queue, Message $message, int $delay = 0): ProducerInterface
+    {
+        return $this->doSend($queue, $message, $delay);
     }
 
     /**
