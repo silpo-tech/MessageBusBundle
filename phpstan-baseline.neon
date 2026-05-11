@@ -171,19 +171,19 @@ parameters:
 		-
 			message: '#^Call to an undefined method Interop\\Amqp\\AmqpContext\:\:expects\(\)\.$#'
 			identifier: method.notFound
-			count: 3
+			count: 4
 			path: tests/TestCase/Unit/Producer/EnqueueProducerTest.php
 
 		-
 			message: '#^Call to an undefined method Interop\\Amqp\\AmqpContext\:\:method\(\)\.$#'
 			identifier: method.notFound
-			count: 15
+			count: 16
 			path: tests/TestCase/Unit/Producer/EnqueueProducerTest.php
 
 		-
 			message: '#^Call to an undefined method Interop\\Queue\\Producer\:\:expects\(\)\.$#'
 			identifier: method.notFound
-			count: 2
+			count: 3
 			path: tests/TestCase/Unit/Producer/EnqueueProducerTest.php
 
 		-

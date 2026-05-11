@@ -100,7 +100,7 @@ class EnqueueProducer implements ProducerInterface, LoggerAwareInterface
         $destination = $this->context->createQueue($queue);
         if ($destination instanceof AmqpQueue) {
             $destination->addFlag(AmqpQueue::FLAG_DURABLE);
-            if ($queueType !== QueueType::DEFAULT) {
+            if (QueueType::DEFAULT !== $queueType) {
                 $destination->setArgument('x-queue-type', $queueType->value);
             }
         }
