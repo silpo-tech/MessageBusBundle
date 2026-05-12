@@ -60,14 +60,23 @@ class RequeueHandler implements ExceptionHandlerInterface
 
         $queueName = $this->getQueueName($processor);
         if ($count > $exception->getCount()) {
-            $this->producer->sendMessageToQueue($this->createFailedQueueName($queueName), $message);
+            $this->producer->sendMessageToQueue(
+                $this->createFailedQueueName($queueName),
+                $message,
+                queueType: $processor->getQueueType(),
+            );
             $this->eventDispatcher->dispatch(
                 new ConsumeRequeueExceedEvent($exception, $message, $context, $processor::class)
             );
 
             $this->logger->error(self::MESSAGE_REQUEUE_EXCEED, $logMessage);
         } else {
-            $this->producer->sendMessageToQueue($queueName, $message, pow(2, $count) * 1000);
+            $this->producer->sendMessageToQueue(
+                $queueName,
+                $message,
+                pow(2, $count) * 1000,
+                $processor->getQueueType(),
+            );
             $this->eventDispatcher->dispatch(
                 new ConsumeRequeueEvent($exception, $message, $context, $processor::class, $count)
             );

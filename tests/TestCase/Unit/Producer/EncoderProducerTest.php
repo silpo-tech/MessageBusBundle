@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MessageBusBundle\Tests\TestCase\Unit\Producer;
 
 use Interop\Queue\Message;
+use Interop\Queue\Queue;
 use MessageBusBundle\Encoder\EncoderInterface;
 use MessageBusBundle\Producer\EncoderProducer;
 use MessageBusBundle\Producer\ProducerInterface;
@@ -138,6 +139,68 @@ class EncoderProducerTest extends TestCase
             ->willReturn($this->producer);
 
         $result = $this->encoderProducer->sendMessage('test-topic', $message);
+
+        $this->assertSame($this->encoderProducer, $result);
+    }
+
+    public function testSendMessageToExistingQueue(): void
+    {
+        $message = $this->createMock(Message::class);
+        $queue = $this->createMock(Queue::class);
+        $encodedBody = 'encoded_body';
+
+        $message->method('getHeader')
+            ->with('content_encoding')
+            ->willReturn(null);
+
+        $message->method('getBody')
+            ->willReturn('body');
+
+        $this->encoder->expects($this->once())
+            ->method('encode')
+            ->with('body')
+            ->willReturn($encodedBody);
+
+        $this->encoder->expects($this->once())
+            ->method('getEncoding')
+            ->willReturn('gzip');
+
+        $message->expects($this->once())
+            ->method('setBody')
+            ->with($encodedBody);
+
+        $message->expects($this->once())
+            ->method('setHeader')
+            ->with('content_encoding', 'gzip');
+
+        $this->producer->expects($this->once())
+            ->method('sendMessageToExistingQueue')
+            ->with($queue, $message, 0)
+            ->willReturn($this->producer);
+
+        $result = $this->encoderProducer->sendMessageToExistingQueue($queue, $message);
+
+        $this->assertSame($this->encoderProducer, $result);
+    }
+
+    public function testSendMessageToExistingQueueSkipsEncodingIfAlreadyEncoded(): void
+    {
+        $message = $this->createMock(Message::class);
+        $queue = $this->createMock(Queue::class);
+
+        $message->method('getHeader')
+            ->with('content_encoding')
+            ->willReturn('gzip');
+
+        $this->encoder->expects($this->never())
+            ->method('encode');
+
+        $this->producer->expects($this->once())
+            ->method('sendMessageToExistingQueue')
+            ->with($queue, $message, 0)
+            ->willReturn($this->producer);
+
+        $result = $this->encoderProducer->sendMessageToExistingQueue($queue, $message);
 
         $this->assertSame($this->encoderProducer, $result);
     }

@@ -8,6 +8,7 @@ use Enqueue\Client\Config;
 use Interop\Queue\Context;
 use Interop\Queue\Message;
 use Interop\Queue\Processor;
+use MessageBusBundle\AmqpTools\QueueType;
 use MessageBusBundle\EnqueueProcessor\ExceptionHandler\FailConsumeHandler;
 use MessageBusBundle\EnqueueProcessor\ProcessorInterface;
 use MessageBusBundle\Producer\ProducerInterface;
@@ -52,13 +53,17 @@ class FailConsumeHandlerTest extends TestCase
             ->method('getSubscribedRoutingKeys')
             ->willReturn(['test_queue' => []]);
 
+        $processor->expects($this->once())
+            ->method('getQueueType')
+            ->willReturn(QueueType::QUORUM);
+
         $this->config->expects($this->once())
             ->method('getSeparator')
             ->willReturn('.');
 
         $this->producer->expects($this->once())
             ->method('sendMessageToQueue')
-            ->with('test_queue.exception.failed', $message);
+            ->with('test_queue.exception.failed', $message, 0, QueueType::QUORUM);
 
         $this->logger->expects($this->any())
             ->method('error');

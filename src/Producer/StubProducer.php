@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace MessageBusBundle\Producer;
 
 use Interop\Queue\Message;
+use Interop\Queue\Queue;
+use MessageBusBundle\AmqpTools\QueueType;
 
 class StubProducer implements ProducerInterface, EncoderProducerInterface
 {
@@ -33,9 +35,20 @@ class StubProducer implements ProducerInterface, EncoderProducerInterface
         return $this;
     }
 
-    public function sendMessageToQueue(string $queue, Message $message, int $delay = 0): ProducerInterface
-    {
+    public function sendMessageToQueue(
+        string $queue,
+        Message $message,
+        int $delay = 0,
+        QueueType $queueType = QueueType::DEFAULT
+    ): ProducerInterface {
         $this->queues[$queue][] = ['message' => $message, 'headers' => []];
+
+        return $this;
+    }
+
+    public function sendMessageToExistingQueue(Queue $queue, Message $message, int $delay = 0): ProducerInterface
+    {
+        $this->queues[$queue->getQueueName()][] = ['message' => $message, 'headers' => []];
 
         return $this;
     }

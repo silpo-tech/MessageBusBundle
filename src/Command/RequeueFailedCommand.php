@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace MessageBusBundle\Command;
 
 use Interop\Amqp\AmqpContext;
+use Interop\Amqp\AmqpDestination;
+use Interop\Amqp\AmqpQueue;
 use Interop\Queue\Context;
 use MessageBusBundle\Producer\ProducerInterface;
 use PhpAmqpLib\Channel\AMQPChannel;
@@ -209,7 +211,7 @@ class RequeueFailedCommand extends Command
         return $headers[$key] ?? null;
     }
 
-    private function publish(string $queue, AMQPMessage $message): void
+    private function publish(string $queueName, AMQPMessage $message): void
     {
         $messageToPublish = $this->context->convertMessage($message);
 
@@ -221,7 +223,13 @@ class RequeueFailedCommand extends Command
         }
 
         $messageToPublish->setProperties($properties);
-        $this->producer->sendMessageToQueue($queue, $messageToPublish);
+
+        $queue = $this->context->createQueue($queueName);
+        if ($queue instanceof AmqpQueue) {
+            $queue->addFlag(AmqpDestination::FLAG_PASSIVE);
+        }
+
+        $this->producer->sendMessageToExistingQueue($queue, $messageToPublish);
     }
 
     /**

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace MessageBusBundle\Producer;
 
 use Interop\Queue\Message;
+use Interop\Queue\Queue;
+use MessageBusBundle\AmqpTools\QueueType;
 use MessageBusBundle\Encoder\EncoderInterface;
 use MessageBusBundle\MessageBus;
 
@@ -67,14 +69,30 @@ class EncoderProducer implements ProducerInterface, EncoderProducerInterface
         return $this;
     }
 
-    public function sendMessageToQueue(string $queue, Message $message, int $delay = 0): ProducerInterface
+    public function sendMessageToQueue(
+        string $queue,
+        Message $message,
+        int $delay = 0,
+        QueueType $queueType = QueueType::DEFAULT
+    ): ProducerInterface {
+        if (!$message->getHeader(MessageBus::ENCODING_HEADER)) {
+            $message->setBody($this->encode($message->getBody()));
+            $message->setHeader(MessageBus::ENCODING_HEADER, $this->encoder->getEncoding());
+        }
+
+        $this->producer->sendMessageToQueue($queue, $message, $delay, $queueType);
+
+        return $this;
+    }
+
+    public function sendMessageToExistingQueue(Queue $queue, Message $message, int $delay = 0): ProducerInterface
     {
         if (!$message->getHeader(MessageBus::ENCODING_HEADER)) {
             $message->setBody($this->encode($message->getBody()));
             $message->setHeader(MessageBus::ENCODING_HEADER, $this->encoder->getEncoding());
         }
 
-        $this->producer->sendMessageToQueue($queue, $message, $delay);
+        $this->producer->sendMessageToExistingQueue($queue, $message, $delay);
 
         return $this;
     }

@@ -58,7 +58,11 @@ class FailConsumeHandler implements ExceptionHandlerInterface
                 )
             );
 
-            $this->producer->sendMessageToQueue($this->createQueueName($processor), $message);
+            $this->producer->sendMessageToQueue(
+                $this->createQueueName($processor),
+                $message,
+                queueType: $processor->getQueueType(),
+            );
 
             $this->logger->error(self::MESSAGE_FAIL_CONSUME, $logMessage);
         } catch (\Throwable $exception) {

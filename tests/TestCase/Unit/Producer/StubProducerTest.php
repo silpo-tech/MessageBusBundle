@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace MessageBusBundle\Tests\TestCase\Unit\Producer;
 
 use Interop\Queue\Message;
+use Interop\Queue\Queue;
+use MessageBusBundle\AmqpTools\QueueType;
 use MessageBusBundle\Producer\StubProducer;
 use PHPUnit\Framework\TestCase;
 
@@ -135,6 +137,31 @@ class StubProducerTest extends TestCase
 
         $this->assertSame($this->producer, $result);
         $this->assertEquals(1, $this->producer->countMessagesInQueue('test.queue'));
+    }
+
+    public function testSendMessageToQueueWithQueueType(): void
+    {
+        $message = $this->createMock(Message::class);
+
+        $result = $this->producer->sendMessageToQueue('test.queue', $message, 0, QueueType::QUORUM);
+
+        $this->assertSame($this->producer, $result);
+        $this->assertEquals(1, $this->producer->countMessagesInQueue('test.queue'));
+    }
+
+    public function testSendMessageToExistingQueue(): void
+    {
+        $message = $this->createMock(Message::class);
+        $queue = $this->createMock(Queue::class);
+        $queue->method('getQueueName')->willReturn('test.queue');
+
+        $result = $this->producer->sendMessageToExistingQueue($queue, $message);
+
+        $this->assertSame($this->producer, $result);
+        $this->assertEquals(1, $this->producer->countMessagesInQueue('test.queue'));
+
+        $messages = $this->producer->getMessagesFromQueue('test.queue');
+        $this->assertSame($message, $messages[0]['message']);
     }
 
     public function testGetAll(): void
