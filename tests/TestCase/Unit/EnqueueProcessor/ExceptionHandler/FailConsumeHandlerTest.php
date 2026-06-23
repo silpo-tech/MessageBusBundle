@@ -49,6 +49,21 @@ class FailConsumeHandlerTest extends TestCase
             ->method('getBody')
             ->willReturn('message body');
 
+        $message->expects($this->any())
+            ->method('getProperties')
+            ->willReturn([]);
+
+        $message->expects($this->any())
+            ->method('getHeaders')
+            ->willReturn([]);
+
+        $setPropertyCalls = [];
+        $message->expects($this->atLeastOnce())
+            ->method('setProperty')
+            ->willReturnCallback(function (string $key, mixed $value) use (&$setPropertyCalls): void {
+                $setPropertyCalls[$key] = $value;
+            });
+
         $processor->expects($this->once())
             ->method('getSubscribedRoutingKeys')
             ->willReturn(['test_queue' => []]);
@@ -71,5 +86,17 @@ class FailConsumeHandlerTest extends TestCase
         $result = $this->handler->handle($exception, $message, $context, $processor);
 
         $this->assertEquals(Processor::REJECT, $result);
+
+        $this->assertArrayHasKey('x-exception-log-datetime', $setPropertyCalls);
+        $this->assertArrayHasKey('x-exception-trace', $setPropertyCalls);
+        $this->assertArrayHasKey('x-exception-class', $setPropertyCalls);
+        $this->assertArrayHasKey('x-exception-message', $setPropertyCalls);
+        $this->assertArrayHasKey('x-exception-file', $setPropertyCalls);
+        $this->assertArrayHasKey('x-exception-line', $setPropertyCalls);
+
+        $this->assertEquals(\Exception::class, $setPropertyCalls['x-exception-class']);
+        $this->assertEquals('Test exception', $setPropertyCalls['x-exception-message']);
+        $this->assertEquals($exception->getFile(), $setPropertyCalls['x-exception-file']);
+        $this->assertEquals($exception->getLine(), $setPropertyCalls['x-exception-line']);
     }
 }

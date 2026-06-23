@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MessageBusBundle\EnqueueProcessor\ExceptionHandler;
 
+use DateTime;
+use DateTimeImmutable;
 use Enqueue\Client\Config;
 use Interop\Queue\Context;
 use Interop\Queue\Message;
@@ -48,6 +50,8 @@ class FailConsumeHandler implements ExceptionHandlerInterface
 
         try {
             $message->setProperty('x-exception-message', $exception->getMessage());
+            $message->setProperty('x-exception-class', $exception::class);
+            $message->setProperty('x-exception-log-datetime', (new DateTimeImmutable())->format(DateTime::W3C));
             $message->setProperty('x-exception-file', $exception->getFile());
             $message->setProperty('x-exception-line', $exception->getLine());
             $message->setProperty(
@@ -55,7 +59,7 @@ class FailConsumeHandler implements ExceptionHandlerInterface
                 json_encode(
                     $this->getExceptionTraceTrait($exception),
                     JSON_THROW_ON_ERROR | JSON_INVALID_UTF8_IGNORE,
-                )
+                ),
             );
 
             $this->producer->sendMessageToQueue(
