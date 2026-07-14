@@ -1,0 +1,31 @@
+# Reusable services for the Symfony Messenger consume bridge. Loaded only when
+# `message_bus.messenger.enabled: true`, so services still on plain enqueue are unaffected.
+#
+# Per-transport wiring stays in the consuming service, because it is service-specific:
+#   - concrete serializer children (parent: ...EnqueueWireSerializer) carrying each transport's processor id;
+#   - the transports / routing / failure_transport in framework.messenger;
+#   - the opt-in MessengerProducerService binding over MessageBusBundle\Service\ProducerService.
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  # Locates existing enqueue processors by service id (tag applied by the bundle to every processor).
+  MessageBusBundle\Messenger\Bridge\ProcessorRegistry:
+    arguments:
+      $processors: !tagged_locator { tag: 'enqueue.transport.processor' }
+
+  MessageBusBundle\Messenger\Bridge\EnqueueMessageFactory: ~
+
+  # Replays a decoded message into the matching enqueue processor. #[AsMessageHandler] is honoured
+  # via autoconfigure; only the enqueue Context has to be wired explicitly.
+  MessageBusBundle\Messenger\Bridge\EnqueueProcessorBridgeHandler:
+    arguments:
+      $context: '@enqueue.transport.default.context'
+
+  # Transport serializer template. The consuming service declares one concrete child per transport
+  # (inbound children carry the processor id; the send-only outbound child leaves it null).
+  MessageBusBundle\Messenger\Serializer\EnqueueWireSerializer:
+    abstract: true
+    arguments:
+      $processorId: null
