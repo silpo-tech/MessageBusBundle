@@ -32,6 +32,7 @@ final class ConfigurationTest extends TestCase
             'listeners' => ['doctrine' => true],
             'compression_level' => Configuration::DEFAULT_COMPRESSION_LEVEL,
             'default_encoder' => null,
+            'messenger' => ['enabled' => false],
         ];
 
         self::assertSame($expected, $config);

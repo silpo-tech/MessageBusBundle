@@ -15,7 +15,9 @@
     "php-amqplib/php-amqplib": "^3.5.1",
     "enqueue/enqueue-bundle": "^0.10",
     "silpo-tech/mapper-bundle": "^1.0",
-    "symfony/doctrine-bridge": "^7.3"
+    "symfony/doctrine-bridge": "^7.3",
+    "symfony/messenger": "^7.0",
+    "symfony/amqp-messenger": "^7.0"
   },
   "require-dev": {
     "symfony/validator": "^7.0",

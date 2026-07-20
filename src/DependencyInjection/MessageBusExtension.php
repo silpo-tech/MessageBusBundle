@@ -20,6 +20,11 @@ class MessageBusExtension extends Extension
         $loader->load('enqueue_services.yaml');
 
         $config = $this->processConfiguration(new Configuration(), $configs);
+
+        if ($config['messenger']['enabled'] ?? false) {
+            $loader->load('messenger_services.yaml');
+        }
+
         $container->setParameter('messagebus.debug', $config['debug']);
         $container->setParameter('messagebus.listeners.doctrine', $config['listeners']['doctrine']);
         $container->setParameter(
