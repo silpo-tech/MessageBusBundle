@@ -6,8 +6,8 @@ namespace MessageBusBundle\Messenger\Serializer;
 
 use MessageBusBundle\Messenger\Bridge\EnqueueEnvelope;
 use MessageBusBundle\Messenger\Message\EnqueueWireMessageInterface;
-use MessengerBundle\Retry\RequeueCountStamper;
 use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\Stamp\RedeliveryStamp;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 
 /**
@@ -25,14 +25,16 @@ use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
  */
 final readonly class EnqueueWireSerializer implements SerializerInterface
 {
-    private RequeueCountStamper $retryCount;
+    /**
+     * MessageBusBundle's own retry counter (see {@see \MessageBusBundle\EnqueueProcessor\ExceptionHandler\RequeueHandler}).
+     * We reuse this exact AMQP header as the bridge between the two retry worlds: on the wire the count
+     * still lives in `requeue-count` (so the legacy producer/consumer and the processor keep reading it),
+     * and in Messenger it is mirrored into a {@see RedeliveryStamp} so `retry_strategy` counts attempts.
+     */
+    private const REQUEUE_COUNT_HEADER = 'requeue-count';
 
     public function __construct(private ?string $processorId = null)
     {
-        // Bridge the two retry worlds through the bundle's own `requeue-count` header: the count stays
-        // on the wire (legacy producer/consumer + the processor keep reading it) and is mirrored into a
-        // RedeliveryStamp so Messenger's retry_strategy counts attempts. Mechanics live in MessengerBundle.
-        $this->retryCount = new RequeueCountStamper('requeue-count');
     }
 
     public function decode(array $encodedEnvelope): Envelope
@@ -49,10 +51,16 @@ final readonly class EnqueueWireSerializer implements SerializerInterface
         /** @var array<string, mixed> $properties */
         $properties = $encodedEnvelope['headers'] ?? [];
 
-        return new Envelope(
-            new EnqueueEnvelope($this->processorId, $body, $properties),
-            $this->retryCount->decode($properties),
-        );
+        $stamps = [];
+        // Resume Messenger's retry count from the wire so a redelivered message is not treated as a
+        // fresh attempt (which would loop forever). The count stays in $properties too, so the
+        // processor still reads `requeue-count` off the message exactly as under enqueue.
+        $retryCount = (int) ($properties[self::REQUEUE_COUNT_HEADER] ?? 0);
+        if ($retryCount > 0) {
+            $stamps[] = new RedeliveryStamp($retryCount);
+        }
+
+        return new Envelope(new EnqueueEnvelope($this->processorId, $body, $properties), $stamps);
     }
 
     public function encode(Envelope $envelope): array
@@ -68,9 +76,18 @@ final readonly class EnqueueWireSerializer implements SerializerInterface
             ));
         }
 
+        $properties = $message->getProperties();
+
+        // Persist the current attempt number back into the `requeue-count` header so it survives the
+        // trip to the broker (a delayed retry copy) and is picked up again by decode() / the processor.
+        $retryCount = RedeliveryStamp::getRetryCountFromEnvelope($envelope);
+        if ($retryCount > 0) {
+            $properties[self::REQUEUE_COUNT_HEADER] = $retryCount;
+        }
+
         return [
             'body' => $message->getBody(),
-            'headers' => $this->retryCount->encode($envelope, $message->getProperties()),
+            'headers' => $properties,
         ];
     }
 }
