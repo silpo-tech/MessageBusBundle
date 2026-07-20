@@ -16,6 +16,7 @@ use MessageBusBundle\Messenger\Bridge\EnqueueEnvelope;
 use MessageBusBundle\Messenger\Bridge\EnqueueMessageFactory;
 use MessageBusBundle\Messenger\Bridge\EnqueueProcessorBridgeHandler;
 use MessageBusBundle\Messenger\Bridge\ProcessorRegistry;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -25,10 +26,10 @@ class EnqueueProcessorBridgeHandlerTest extends TestCase
 {
     private const PROCESSOR_ID = 'test.processor.send_push';
 
-    private AbstractProcessor $processor;
+    private MockObject&AbstractProcessor $processor;
     private Context $context;
     private EventDispatcher $eventDispatcher;
-    private MapperInterface $mapper;
+    private MockObject&MapperInterface $mapper;
     private EnqueueProcessorBridgeHandler $handler;
 
     protected function setUp(): void

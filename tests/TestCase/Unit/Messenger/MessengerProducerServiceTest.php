@@ -9,6 +9,7 @@ use MessageBusBundle\Messenger\Adapter\MessengerProducerService;
 use MessageBusBundle\Messenger\Message\PublishEnqueueMessage;
 use MessageBusBundle\Producer\ProducerInterface;
 use MessageBusBundle\Service\ProducerService;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
 use Symfony\Component\Messenger\Envelope;
@@ -17,8 +18,8 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 class MessengerProducerServiceTest extends TestCase
 {
-    private ProducerInterface $producer;
-    private MessageBusInterface $bus;
+    private MockObject&ProducerInterface $producer;
+    private MockObject&MessageBusInterface $bus;
     private SerializerInterface $serializer;
 
     protected function setUp(): void

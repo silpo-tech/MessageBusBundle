@@ -54,11 +54,7 @@ final class EnqueueProcessorBridgeHandler
         $processor = $this->processors->get($envelope->getProcessorId());
 
         if (!$processor instanceof AbstractProcessor) {
-            throw new \LogicException(sprintf(
-                'Processor "%s" must extend %s to run through the native Messenger bridge.',
-                $envelope->getProcessorId(),
-                AbstractProcessor::class,
-            ));
+            throw new \LogicException(sprintf('Processor "%s" must extend %s to run through the native Messenger bridge.', $envelope->getProcessorId(), AbstractProcessor::class));
         }
 
         $message = $this->messageFactory->create($envelope);
@@ -84,9 +80,7 @@ final class EnqueueProcessorBridgeHandler
                 Events::CONSUME__EXCEPTION,
             );
 
-            throw $exception instanceof RejectException
-                ? new UnrecoverableMessageHandlingException($exception->getMessage(), 0, $exception)
-                : $exception;
+            throw $exception instanceof RejectException ? new UnrecoverableMessageHandlingException($exception->getMessage(), 0, $exception) : $exception;
         }
 
         // consume.finished fires for every non-throwing outcome (incl. REQUEUE/REJECT status), matching

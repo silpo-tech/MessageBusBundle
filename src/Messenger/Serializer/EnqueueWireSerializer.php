@@ -37,17 +37,17 @@ final readonly class EnqueueWireSerializer implements SerializerInterface
     {
     }
 
+    /**
+     * @param array{body: string, headers?: array<string, mixed>} $encodedEnvelope enqueue properties may
+     *                                                                             carry non-string values (e.g. int `requeue-count`)
+     */
     public function decode(array $encodedEnvelope): Envelope
     {
         if (null === $this->processorId) {
-            throw new \LogicException(sprintf(
-                '%s was configured without a processor id and cannot decode inbound messages; '
-                .'it is a send-only serializer.',
-                self::class,
-            ));
+            throw new \LogicException(sprintf('%s was configured without a processor id and cannot decode inbound messages; it is a send-only serializer.', self::class));
         }
 
-        $body = $encodedEnvelope['body'] ?? '';
+        $body = $encodedEnvelope['body'];
         /** @var array<string, mixed> $properties */
         $properties = $encodedEnvelope['headers'] ?? [];
 
@@ -68,12 +68,7 @@ final readonly class EnqueueWireSerializer implements SerializerInterface
         $message = $envelope->getMessage();
 
         if (!$message instanceof EnqueueWireMessageInterface) {
-            throw new \LogicException(sprintf(
-                '%s can only encode %s messages, got %s.',
-                self::class,
-                EnqueueWireMessageInterface::class,
-                get_debug_type($message),
-            ));
+            throw new \LogicException(sprintf('%s can only encode %s messages, got %s.', self::class, EnqueueWireMessageInterface::class, get_debug_type($message)));
         }
 
         $properties = $message->getProperties();

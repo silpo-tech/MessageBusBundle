@@ -16,7 +16,7 @@ final class ProcessorRegistry
 {
     /**
      * @param ContainerInterface $processors service locator over the `enqueue.transport.processor` tag,
-     *                                        indexed by service id
+     *                                       indexed by service id
      */
     public function __construct(private readonly ContainerInterface $processors)
     {
@@ -25,17 +25,13 @@ final class ProcessorRegistry
     public function get(string $processorId): Processor
     {
         if (!$this->processors->has($processorId)) {
-            throw new \InvalidArgumentException(
-                sprintf('No enqueue processor registered with id "%s".', $processorId),
-            );
+            throw new \InvalidArgumentException(sprintf('No enqueue processor registered with id "%s".', $processorId));
         }
 
         $processor = $this->processors->get($processorId);
 
         if (!$processor instanceof Processor) {
-            throw new \LogicException(
-                sprintf('Service "%s" must implement %s to be used by the Messenger bridge.', $processorId, Processor::class),
-            );
+            throw new \LogicException(sprintf('Service "%s" must implement %s to be used by the Messenger bridge.', $processorId, Processor::class));
         }
 
         return $processor;
