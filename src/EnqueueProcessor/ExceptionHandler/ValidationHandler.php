@@ -55,7 +55,7 @@ class ValidationHandler implements ExceptionHandlerInterface
         return Processor::ACK;
     }
 
-    public function supports(\Throwable $exception): bool
+    public function supports(\Throwable $exception, ?ProcessorInterface $processor = null): bool
     {
         return $exception instanceof ValidationException;
     }

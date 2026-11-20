@@ -17,7 +17,6 @@ use MessageBusBundle\Producer\ProducerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Throwable;
 
 class RequeueHandler implements ExceptionHandlerInterface
 {
@@ -46,7 +45,7 @@ class RequeueHandler implements ExceptionHandlerInterface
     }
 
     public function handle(
-        Throwable $exception,
+        \Throwable $exception,
         Message $message,
         Context $context,
         ProcessorInterface $processor,
@@ -61,7 +60,7 @@ class RequeueHandler implements ExceptionHandlerInterface
         ++$count;
         $message->setProperty(self::REQUEUE_COUNT_KEY, $count);
 
-        $original = $this->exposePreviousException && $exception->getPrevious() !== null
+        $original = $this->exposePreviousException && null !== $exception->getPrevious()
             ? $exception->getPrevious()
             : $exception;
 
@@ -106,7 +105,7 @@ class RequeueHandler implements ExceptionHandlerInterface
         return Processor::ACK;
     }
 
-    public function supports(Throwable $exception, ProcessorInterface|null $processor = null): bool
+    public function supports(\Throwable $exception, ?ProcessorInterface $processor = null): bool
     {
         if ($this->nonRetryableExceptionChecker->isNonRetryable($exception)) {
             return false;
@@ -120,7 +119,7 @@ class RequeueHandler implements ExceptionHandlerInterface
         return $queueName.$this->config->getSeparator().self::REQUEUE_FAILED_QUEUE;
     }
 
-    private function resolveMaxRetries(Throwable $exception, ProcessorInterface|null $processor): int
+    private function resolveMaxRetries(\Throwable $exception, ?ProcessorInterface $processor): int
     {
         return match (true) {
             $exception instanceof RequeueException => $exception->getCount(),

@@ -44,7 +44,7 @@ class RejectHandler implements ExceptionHandlerInterface
         return Processor::REJECT;
     }
 
-    public function supports(\Throwable $exception): bool
+    public function supports(\Throwable $exception, ?ProcessorInterface $processor = null): bool
     {
         return $exception instanceof RejectException;
     }

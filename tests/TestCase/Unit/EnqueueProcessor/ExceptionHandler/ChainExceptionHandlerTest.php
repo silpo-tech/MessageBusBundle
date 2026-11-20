@@ -9,7 +9,6 @@ use Interop\Queue\Message;
 use MessageBusBundle\EnqueueProcessor\ExceptionHandler\ChainExceptionHandler;
 use MessageBusBundle\EnqueueProcessor\ExceptionHandler\ExceptionHandlerInterface;
 use MessageBusBundle\EnqueueProcessor\ProcessorInterface;
-use Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -39,7 +38,7 @@ class ChainExceptionHandlerTest extends TestCase
 
     public function testHandleWithSupportingHandler(): void
     {
-        $exception = new Exception('Test exception');
+        $exception = new \Exception('Test exception');
         $handler = $this->createMock(ExceptionHandlerInterface::class);
 
         $handler->expects($this->once())
@@ -61,7 +60,7 @@ class ChainExceptionHandlerTest extends TestCase
 
     public function testHandleWithNonSupportingHandler(): void
     {
-        $exception = new Exception('Test exception');
+        $exception = new \Exception('Test exception');
         $handler = $this->createMock(ExceptionHandlerInterface::class);
 
         $handler->expects($this->once())
@@ -81,7 +80,7 @@ class ChainExceptionHandlerTest extends TestCase
 
     public function testHandleWithMultipleHandlersByPriority(): void
     {
-        $exception = new Exception('Test exception');
+        $exception = new \Exception('Test exception');
         $handler1 = $this->createMock(ExceptionHandlerInterface::class);
         $handler2 = $this->createMock(ExceptionHandlerInterface::class);
 

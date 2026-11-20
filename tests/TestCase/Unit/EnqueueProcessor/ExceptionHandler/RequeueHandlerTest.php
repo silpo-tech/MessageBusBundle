@@ -8,7 +8,6 @@ use Enqueue\Client\Config;
 use Interop\Queue\Context;
 use Interop\Queue\Message;
 use Interop\Queue\Processor;
-use InvalidArgumentException;
 use MessageBusBundle\AmqpTools\QueueType;
 use MessageBusBundle\EnqueueProcessor\ExceptionHandler\NonRetryableExceptionChecker;
 use MessageBusBundle\EnqueueProcessor\ExceptionHandler\RequeueHandler;
@@ -23,11 +22,6 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
-use RuntimeException;
-use Throwable;
-use TypeError;
-use UnexpectedValueException;
-use ValueError;
 
 class RequeueHandlerTest extends TestCase
 {
@@ -65,19 +59,19 @@ class RequeueHandlerTest extends TestCase
     // supports()
 
     #[DataProvider('providerNonRetryableExceptions')]
-    public function testSupportsReturnsFalseForNonRetryableException(Throwable $exception): void
+    public function testSupportsReturnsFalseForNonRetryableException(\Throwable $exception): void
     {
         self::assertFalse($this->makeHandler()->supports($exception));
     }
 
     public function testSupportsReturnsFalseWhenMaxRetriesIsZero(): void
     {
-        self::assertFalse($this->makeHandler(maxRetries: 0)->supports(new RuntimeException()));
+        self::assertFalse($this->makeHandler(maxRetries: 0)->supports(new \RuntimeException()));
     }
 
     public function testSupportsReturnsTrueForRetryableExceptionWithMaxRetries(): void
     {
-        self::assertTrue($this->makeHandler(maxRetries: 3)->supports(new RuntimeException()));
+        self::assertTrue($this->makeHandler(maxRetries: 3)->supports(new \RuntimeException()));
     }
 
     public function testSupportsReturnsTrueForRequeueException(): void
@@ -93,27 +87,45 @@ class RequeueHandlerTest extends TestCase
     public function testSupportsReturnsFalseWhenProcessorOverridesMaxRetriesToZero(): void
     {
         $processor = new class implements ProcessorInterface, OverridesRetryConfigInterface {
-            public function getMaxRetries(): int { return 0; }
+            public function getMaxRetries(): int
+            {
+                return 0;
+            }
 
-            public function getSubscribedRoutingKeys(): array { return ['test.queue' => []]; }
+            public function getSubscribedRoutingKeys(): array
+            {
+                return ['test.queue' => []];
+            }
 
-            public function getQueueType(): QueueType { return QueueType::DEFAULT; }
+            public function getQueueType(): QueueType
+            {
+                return QueueType::DEFAULT;
+            }
         };
 
-        self::assertFalse($this->makeHandler(maxRetries: 5)->supports(new RuntimeException(), $processor));
+        self::assertFalse($this->makeHandler(maxRetries: 5)->supports(new \RuntimeException(), $processor));
     }
 
     public function testSupportsReturnsTrueWhenProcessorOverridesMaxRetries(): void
     {
         $processor = new class implements ProcessorInterface, OverridesRetryConfigInterface {
-            public function getMaxRetries(): int { return 3; }
+            public function getMaxRetries(): int
+            {
+                return 3;
+            }
 
-            public function getSubscribedRoutingKeys(): array { return ['test.queue' => []]; }
+            public function getSubscribedRoutingKeys(): array
+            {
+                return ['test.queue' => []];
+            }
 
-            public function getQueueType(): QueueType { return QueueType::DEFAULT; }
+            public function getQueueType(): QueueType
+            {
+                return QueueType::DEFAULT;
+            }
         };
 
-        self::assertTrue($this->makeHandler(maxRetries: 0)->supports(new RuntimeException(), $processor));
+        self::assertTrue($this->makeHandler(maxRetries: 0)->supports(new \RuntimeException(), $processor));
     }
 
     // handle() — retry
@@ -173,7 +185,7 @@ class RequeueHandlerTest extends TestCase
             ->method('sendMessageToQueue')
             ->with('test.queue', $message, 2000, QueueType::DEFAULT);
 
-        $this->makeHandler(maxRetries: 3)->handle(new RuntimeException('fail'), $message, $this->createMock(Context::class), $this->processor);
+        $this->makeHandler(maxRetries: 3)->handle(new \RuntimeException('fail'), $message, $this->createMock(Context::class), $this->processor);
     }
 
     // handle() — exposePreviousException
@@ -185,12 +197,12 @@ class RequeueHandlerTest extends TestCase
         $message->method('getBody')->willReturn('{}');
         $message->method('getCorrelationId')->willReturn('id');
 
-        $previous = new RuntimeException('original message');
+        $previous = new \RuntimeException('original message');
         $exception = new RequeueException('wrapper message', 3, $previous);
 
         $message->expects($this->exactly(2))->method('setProperty')->willReturnCallback(
             function (string $key, mixed $value) use (&$reason): void {
-                if ($key === 'requeue-reason') {
+                if ('requeue-reason' === $key) {
                     $reason = $value;
                 }
             }
@@ -208,12 +220,12 @@ class RequeueHandlerTest extends TestCase
         $message->method('getBody')->willReturn('{}');
         $message->method('getCorrelationId')->willReturn('id');
 
-        $previous = new RuntimeException('original message');
+        $previous = new \RuntimeException('original message');
         $exception = new RequeueException('wrapper message', 3, $previous);
 
         $message->expects($this->exactly(2))->method('setProperty')->willReturnCallback(
             function (string $key, mixed $value) use (&$reason): void {
-                if ($key === 'requeue-reason') {
+                if ('requeue-reason' === $key) {
                     $reason = $value;
                 }
             }
@@ -233,14 +245,14 @@ class RequeueHandlerTest extends TestCase
 
     public function testDoesNotSupportOtherExceptionsWhenMaxRetriesIsZero(): void
     {
-        self::assertFalse($this->makeHandler(maxRetries: 0)->supports(new RuntimeException('Test')));
+        self::assertFalse($this->makeHandler(maxRetries: 0)->supports(new \RuntimeException('Test')));
     }
 
     public static function providerNonRetryableExceptions(): iterable
     {
-        yield 'InvalidArgumentException' => [new InvalidArgumentException()];
-        yield 'UnexpectedValueException' => [new UnexpectedValueException()];
-        yield 'TypeError' => [new TypeError()];
-        yield 'ValueError' => [new ValueError()];
+        yield 'InvalidArgumentException' => [new \InvalidArgumentException()];
+        yield 'UnexpectedValueException' => [new \UnexpectedValueException()];
+        yield 'TypeError' => [new \TypeError()];
+        yield 'ValueError' => [new \ValueError()];
     }
 }
