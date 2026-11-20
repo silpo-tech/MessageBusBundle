@@ -32,6 +32,11 @@ final class ConfigurationTest extends TestCase
             'listeners' => ['doctrine' => true],
             'compression_level' => Configuration::DEFAULT_COMPRESSION_LEVEL,
             'default_encoder' => null,
+            'requeue' => [
+                'max_retries' => 0,
+                'expose_previous_exception' => false,
+                'non_retryable_exceptions' => [],
+            ],
         ];
 
         self::assertSame($expected, $config);
@@ -97,6 +102,21 @@ final class ConfigurationTest extends TestCase
         yield 'allow options set' => [
             ['allow_options' => ['option1', 'option2']],
             ['allow_options' => ['option1', 'option2']],
+        ];
+
+        yield 'requeue max retries' => [
+            ['requeue' => ['max_retries' => 5]],
+            ['requeue' => ['max_retries' => 5, 'expose_previous_exception' => false, 'non_retryable_exceptions' => []]],
+        ];
+
+        yield 'requeue expose previous exception' => [
+            ['requeue' => ['expose_previous_exception' => true]],
+            ['requeue' => ['max_retries' => 0, 'expose_previous_exception' => true, 'non_retryable_exceptions' => []]],
+        ];
+
+        yield 'requeue non retryable exceptions' => [
+            ['requeue' => ['non_retryable_exceptions' => ['App\Exception\FooException']]],
+            ['requeue' => ['max_retries' => 0, 'expose_previous_exception' => false, 'non_retryable_exceptions' => ['App\Exception\FooException']]],
         ];
     }
 

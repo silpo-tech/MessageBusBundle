@@ -31,5 +31,8 @@ class MessageBusExtension extends Extension
             $config['default_encoder'] ?? null
         );
         $container->setParameter('messagebus.allow_options', $config['allow_options'] ?? []);
+        $container->setParameter('messagebus.requeue.max_retries', $config['requeue']['max_retries']);
+        $container->setParameter('messagebus.requeue.expose_previous_exception', $config['requeue']['expose_previous_exception']);
+        $container->setParameter('messagebus.requeue.non_retryable_exceptions', $config['requeue']['non_retryable_exceptions']);
     }
 }

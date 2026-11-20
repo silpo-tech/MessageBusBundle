@@ -7,14 +7,16 @@ namespace MessageBusBundle\EnqueueProcessor\ExceptionHandler;
 use Interop\Queue\Context;
 use Interop\Queue\Message;
 use MessageBusBundle\EnqueueProcessor\ProcessorInterface;
+use SplPriorityQueue;
+use Throwable;
 
 class ChainExceptionHandler
 {
-    private \SplPriorityQueue $queue;
+    private SplPriorityQueue $queue;
 
     public function __construct()
     {
-        $this->queue = new \SplPriorityQueue();
+        $this->queue = new SplPriorityQueue();
     }
 
     public function addHandler(ExceptionHandlerInterface $handler, int $priority): self
@@ -24,11 +26,11 @@ class ChainExceptionHandler
         return $this;
     }
 
-    public function handle(ProcessorInterface $processor, \Throwable $exception, Message $message, Context $context): ?string
+    public function handle(ProcessorInterface $processor, Throwable $exception, Message $message, Context $context): ?string
     {
         /** @var ExceptionHandlerInterface $handler */
         foreach (clone $this->queue as $handler) {
-            if ($handler->supports($exception)) {
+            if ($handler->supports($exception, $processor)) {
                 $result = $handler->handle($exception, $message, $context, $processor);
                 if (isset($result)) {
                     return $result;
