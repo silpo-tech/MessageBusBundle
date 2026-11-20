@@ -8,11 +8,12 @@ use Interop\Queue\Context;
 use Interop\Queue\Message;
 use MessageBusBundle\EnqueueProcessor\ExceptionHandler\ExceptionHandlerInterface;
 use MessageBusBundle\EnqueueProcessor\ProcessorInterface;
+use Throwable;
 
 class FinishExceptionHandler implements ExceptionHandlerInterface
 {
     public function handle(
-        \Throwable $exception,
+        Throwable $exception,
         Message $message,
         Context $context,
         ProcessorInterface $processor,
@@ -20,7 +21,7 @@ class FinishExceptionHandler implements ExceptionHandlerInterface
         throw $exception;
     }
 
-    public function supports(\Throwable $exception): bool
+    public function supports(Throwable $exception, ProcessorInterface|null $processor = null): bool
     {
         return true;
     }

@@ -35,6 +35,17 @@ class Configuration implements ConfigurationInterface
                     ->values([null, GzipEncoder::ENCODING, ZlibEncoder::ENCODING, DeflateEncoder::ENCODING])
                     ->defaultNull()
                 ->end()
+                ->arrayNode('requeue')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->integerNode('max_retries')->defaultValue(0)->end()
+                        ->booleanNode('expose_previous_exception')->defaultFalse()->end()
+                        ->arrayNode('non_retryable_exceptions')
+                            ->scalarPrototype()->end()
+                            ->defaultValue([])
+                        ->end()
+                    ->end()
+                ->end() // requeue
             ->end();
 
         return $treeBuilder;
