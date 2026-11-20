@@ -48,8 +48,18 @@ abstract class AbstractBatchProcessor implements BatchProcessorInterface, Proces
         return QueueType::DEFAULT;
     }
 
+    public function getNonRetryableExceptions(): array
+    {
+        return [
+            \InvalidArgumentException::class,
+            \UnexpectedValueException::class,
+            \TypeError::class,
+            \ValueError::class,
+        ];
+    }
+
     /**
-     * @param InteropMessage[]
+     * @param InteropMessage[] $messagesBatch
      *
      * @return string[]
      *
