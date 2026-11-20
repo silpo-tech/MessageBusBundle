@@ -12,7 +12,9 @@ use MessageBusBundle\EnqueueProcessor\OverridesRetryConfigInterface;
 use MessageBusBundle\EnqueueProcessor\ProcessorInterface;
 use MessageBusBundle\Events\ConsumeRequeueEvent;
 use MessageBusBundle\Events\ConsumeRequeueExceedEvent;
+use MessageBusBundle\Exception\RejectException;
 use MessageBusBundle\Exception\RequeueException;
+use MessageBusBundle\Exception\ValidationException;
 use MessageBusBundle\Producer\ProducerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
@@ -107,7 +109,12 @@ class RequeueHandler implements ExceptionHandlerInterface
 
     public function supports(\Throwable $exception, ?ProcessorInterface $processor = null): bool
     {
-        if ($this->nonRetryableExceptionChecker->isNonRetryable($exception)) {
+        if ($exception instanceof RejectException || $exception instanceof ValidationException) {
+            return false;
+        }
+
+        $perProcessorNonRetryableExceptions = $processor?->getNonRetryableExceptions() ?? [];
+        if ($this->nonRetryableExceptionChecker->isNonRetryable($exception, $perProcessorNonRetryableExceptions)) {
             return false;
         }
 

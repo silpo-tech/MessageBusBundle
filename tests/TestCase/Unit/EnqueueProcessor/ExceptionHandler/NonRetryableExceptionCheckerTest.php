@@ -20,14 +20,19 @@ final class NonRetryableExceptionCheckerTest extends TestCase
     #[DataProvider('providerDefaultNonRetryableExceptions')]
     public function testDefaultExceptionsAreNonRetryable(\Throwable $exception): void
     {
-        self::assertTrue($this->checker->isNonRetryable($exception));
+        self::assertTrue($this->checker->isNonRetryable($exception, [
+            \InvalidArgumentException::class,
+            \UnexpectedValueException::class,
+            \TypeError::class,
+            \ValueError::class,
+        ]));
     }
 
     public function testSubclassOfDefaultIsNonRetryable(): void
     {
         $subclass = new class extends \InvalidArgumentException {};
 
-        self::assertTrue($this->checker->isNonRetryable($subclass));
+        self::assertTrue($this->checker->isNonRetryable($subclass, [\InvalidArgumentException::class]));
     }
 
     public function testRuntimeExceptionIsRetryable(): void
@@ -35,7 +40,7 @@ final class NonRetryableExceptionCheckerTest extends TestCase
         self::assertFalse($this->checker->isNonRetryable(new \RuntimeException()));
     }
 
-    public function testCustomNonRetryableExceptionIsNonRetryable(): void
+    public function testGlobalNonRetryableExceptionIsNonRetryable(): void
     {
         $custom = new class extends \RuntimeException {};
         $checker = new NonRetryableExceptionChecker([$custom::class]);
@@ -43,7 +48,15 @@ final class NonRetryableExceptionCheckerTest extends TestCase
         self::assertTrue($checker->isNonRetryable($custom));
     }
 
-    public function testExceptionNotInCustomListIsRetryable(): void
+    public function testAdditionalNonRetryableExceptionIsNonRetryable(): void
+    {
+        $custom = new class extends \RuntimeException {};
+        $checker = new NonRetryableExceptionChecker();
+
+        self::assertTrue($checker->isNonRetryable($custom, [$custom::class]));
+    }
+
+    public function testExceptionNotInAnyListIsRetryable(): void
     {
         $checker = new NonRetryableExceptionChecker([\RuntimeException::class]);
         $other = new class extends \LogicException {};

@@ -3,6 +3,7 @@ parameters:
   message_bus.batch_size.default: "%env(int:MESSAGE_BUS_BATCH_SIZE)%"
   env(MESSAGE_BUS_RECEIVE_TIMEOUT): "10000"
   message_bus.batch.receive_timeout.default: "%env(int:MESSAGE_BUS_RECEIVE_TIMEOUT)%"
+  messagebus.requeue.default_non_retryable_exceptions: []
 
 services:
   _defaults:
@@ -19,8 +20,8 @@ services:
   MessageBusBundle\EnqueueProcessor\ExceptionHandler\ChainExceptionHandler:
     calls:
       - [addHandler, ['@MessageBusBundle\EnqueueProcessor\ExceptionHandler\RequeueHandler', 10]]
-      - [addHandler, ['@MessageBusBundle\EnqueueProcessor\ExceptionHandler\ValidationHandler', 10]]
-      - [addHandler, ['@MessageBusBundle\EnqueueProcessor\ExceptionHandler\RejectHandler', 10]]
+      - [addHandler, ['@MessageBusBundle\EnqueueProcessor\ExceptionHandler\ValidationHandler', 20]]
+      - [addHandler, ['@MessageBusBundle\EnqueueProcessor\ExceptionHandler\RejectHandler', 20]]
       - [addHandler, ['@MessageBusBundle\EnqueueProcessor\ExceptionHandler\FailConsumeHandler', 0]]
 
   MessageBusBundle\Command\SetupTransportCommand:
@@ -46,6 +47,8 @@ services:
   MessageBusBundle\Command\RequeueFailedCommand:
     tags:
       - { name: 'console.command' }
+
+  MessageBusBundle\EnqueueProcessor\ExceptionHandler\NonRetryableExceptionChecker: ~
 
   MessageBusBundle\EnqueueProcessor\ExceptionHandler\RequeueHandler:
     arguments:

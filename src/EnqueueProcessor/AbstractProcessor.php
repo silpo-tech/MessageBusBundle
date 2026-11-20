@@ -58,6 +58,19 @@ abstract class AbstractProcessor implements Processor, ProcessorInterface, Logge
         return QueueType::DEFAULT;
     }
 
+    /**
+     * @return class-string<\Throwable>[]
+     */
+    public function getNonRetryableExceptions(): array
+    {
+        return [
+            \InvalidArgumentException::class,
+            \UnexpectedValueException::class,
+            \TypeError::class,
+            \ValueError::class,
+        ];
+    }
+
     public function process(Message $message, Context $context): string
     {
         $body = $message->getBody();

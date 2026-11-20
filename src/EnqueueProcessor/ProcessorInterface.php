@@ -22,4 +22,9 @@ interface ProcessorInterface
     public function getSubscribedRoutingKeys(): array;
 
     public function getQueueType(): QueueType;
+
+    /**
+     * @return class-string<\Throwable>[]
+     */
+    public function getNonRetryableExceptions(): array;
 }

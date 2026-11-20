@@ -8,13 +8,6 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 class NonRetryableExceptionChecker
 {
-    private const DEFAULT_NON_RETRYABLE = [
-        \InvalidArgumentException::class,
-        \UnexpectedValueException::class,
-        \TypeError::class,
-        \ValueError::class,
-    ];
-
     /**
      * @param class-string<\Throwable>[] $nonRetryableExceptions
      */
@@ -24,9 +17,12 @@ class NonRetryableExceptionChecker
     ) {
     }
 
-    public function isNonRetryable(\Throwable $e): bool
+    /**
+     * @param class-string<\Throwable>[] $additionalNonRetryableExceptions
+     */
+    public function isNonRetryable(\Throwable $e, array $additionalNonRetryableExceptions = []): bool
     {
-        foreach ([...self::DEFAULT_NON_RETRYABLE, ...$this->nonRetryableExceptions] as $class) {
+        foreach ([...$this->nonRetryableExceptions, ...$additionalNonRetryableExceptions] as $class) {
             if ($e instanceof $class) {
                 return true;
             }
