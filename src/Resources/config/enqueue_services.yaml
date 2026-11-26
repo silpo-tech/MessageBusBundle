@@ -95,5 +95,7 @@ services:
   MessageBusBundle\EventSubscriber\EncodedMessageEventSubscriber: ~
   MessageBusBundle\EventSubscriber\SentryProfilerEventSubscriber: ~
   MessageBusBundle\EventSubscriber\ConsoleSubscriber: ~
+  MessageBusBundle\Service\ConsumerHeartbeat: ~
+  MessageBusBundle\EventSubscriber\ConsumerHeartbeatSubscriber: ~
 
   MessageBusBundle\AmqpTools\RabbitMqQueueManager: ~
