@@ -28,7 +28,7 @@ class ChainExceptionHandler
     {
         /** @var ExceptionHandlerInterface $handler */
         foreach (clone $this->queue as $handler) {
-            if ($handler->supports($exception)) {
+            if ($handler->supports($exception, $processor)) {
                 $result = $handler->handle($exception, $message, $context, $processor);
                 if (isset($result)) {
                     return $result;

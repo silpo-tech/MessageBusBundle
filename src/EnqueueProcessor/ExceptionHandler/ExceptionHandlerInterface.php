@@ -17,5 +17,5 @@ interface ExceptionHandlerInterface
         ProcessorInterface $processor,
     ): ?string;
 
-    public function supports(\Throwable $exception): bool;
+    public function supports(\Throwable $exception, ?ProcessorInterface $processor = null): bool;
 }

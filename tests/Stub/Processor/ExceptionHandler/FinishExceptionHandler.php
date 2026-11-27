@@ -20,7 +20,7 @@ class FinishExceptionHandler implements ExceptionHandlerInterface
         throw $exception;
     }
 
-    public function supports(\Throwable $exception): bool
+    public function supports(\Throwable $exception, ?ProcessorInterface $processor = null): bool
     {
         return true;
     }

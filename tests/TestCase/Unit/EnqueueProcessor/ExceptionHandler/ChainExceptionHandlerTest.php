@@ -43,7 +43,7 @@ class ChainExceptionHandlerTest extends TestCase
 
         $handler->expects($this->once())
             ->method('supports')
-            ->with($exception)
+            ->with($exception, $this->processor)
             ->willReturn(true);
 
         $handler->expects($this->once())
@@ -65,7 +65,7 @@ class ChainExceptionHandlerTest extends TestCase
 
         $handler->expects($this->once())
             ->method('supports')
-            ->with($exception)
+            ->with($exception, $this->processor)
             ->willReturn(false);
 
         $handler->expects($this->never())
@@ -87,7 +87,7 @@ class ChainExceptionHandlerTest extends TestCase
         // Handler with higher priority should be called first
         $handler2->expects($this->once())
             ->method('supports')
-            ->with($exception)
+            ->with($exception, $this->processor)
             ->willReturn(true);
 
         $handler2->expects($this->once())
