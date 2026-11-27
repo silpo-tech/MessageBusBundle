@@ -27,7 +27,6 @@ class Kernel extends BaseKernel
         yield new MessageBusBundle();
     }
 
-    // @phpstan-ignore-next-line
     private function configureContainer(ContainerConfigurator $container): void
     {
         $container->extension('framework', [
