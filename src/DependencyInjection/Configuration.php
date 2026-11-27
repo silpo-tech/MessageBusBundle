@@ -35,6 +35,13 @@ class Configuration implements ConfigurationInterface
                     ->values([null, GzipEncoder::ENCODING, ZlibEncoder::ENCODING, DeflateEncoder::ENCODING])
                     ->defaultNull()
                 ->end()
+                ->arrayNode('messenger')
+                    ->addDefaultsIfNotSet()
+                    ->info('Enables the Symfony Messenger consume bridge (run processors via messenger:consume).')
+                    ->children()
+                        ->booleanNode('enabled')->defaultFalse()->end()
+                    ->end()
+                ->end() // messenger
             ->end();
 
         return $treeBuilder;
